@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.p1nero.cataclysm_dimension.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "NoiseRouterDataInvoker"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

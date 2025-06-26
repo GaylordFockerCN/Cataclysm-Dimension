@@ -1,0 +1,152 @@
+package com.p1nero.cataclysm_dimension.worldgen.noise;
+
+import com.p1nero.cataclysm_dimension.CataclysmDimension;
+import com.p1nero.cataclysm_dimension.mixin.NoiseRouterDataInvoker;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.data.worldgen.SurfaceRuleData;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.OverworldBiomeBuilder;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.*;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
+
+import java.util.List;
+
+
+public class CDNoiseSettings {
+    public static final ResourceKey<NoiseGeneratorSettings> PLAIN = createNoiseGeneratorKey("plain_noise_gen");
+    public static final ResourceKey<NoiseGeneratorSettings> SEA = createNoiseGeneratorKey("sea");
+    public static final ResourceKey<NoiseGeneratorSettings> DESERT = createNoiseGeneratorKey("no_sea");
+    public static final ResourceKey<NoiseGeneratorSettings> BIG_NETHER = createNoiseGeneratorKey("big_nether");
+
+    private static ResourceKey<NoiseGeneratorSettings> createNoiseGeneratorKey(String name) {
+        return ResourceKey.create(Registries.NOISE_SETTINGS, ResourceLocation.fromNamespaceAndPath(CataclysmDimension.MOD_ID, name));
+    }
+
+    public static void bootstrap(BootstrapContext<NoiseGeneratorSettings> context) {
+        HolderGetter<DensityFunction> densityFunctions = context.lookup(Registries.DENSITY_FUNCTION);
+        HolderGetter<NormalNoise.NoiseParameters> noise = context.lookup(Registries.NOISE);
+        context.register(PLAIN, plainNoise(densityFunctions, noise));
+        context.register(SEA, overworldWithSeaLevel(context, false, false, 128));
+        context.register(DESERT, plainDesert(densityFunctions, noise));
+        context.register(BIG_NETHER, bigNether(context));
+    }
+
+    public static NoiseGeneratorSettings plainNoise(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
+        return new NoiseGeneratorSettings(
+                new NoiseSettings(32, 256, 1, 2),
+                Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(),
+                overworld(densityFunctions, noiseParameters),
+                SurfaceRuleData.overworld(), (new OverworldBiomeBuilder()).spawnTarget(),
+                63,
+                false,
+                true,
+                true,
+                false);
+    }
+
+
+    public static NoiseGeneratorSettings plainDesert(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
+        return new NoiseGeneratorSettings(
+                new NoiseSettings(32, 256, 1, 2),
+                Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(),
+                overworld(densityFunctions, noiseParameters),
+                SurfaceRuleData.overworld(), (new OverworldBiomeBuilder()).spawnTarget(),
+                -128,
+                false,
+                true,
+                true,
+                false);
+    }
+
+    public static NoiseGeneratorSettings bigNether(BootstrapContext<?> context) {
+        return new NoiseGeneratorSettings( new NoiseSettings(-64, 384, 1, 2),
+                Blocks.NETHERRACK.defaultBlockState(),
+                Blocks.LAVA.defaultBlockState(),
+                NoiseRouterDataInvoker.invokeNether(context.lookup(Registries.DENSITY_FUNCTION), context.lookup(Registries.NOISE)),
+                SurfaceRuleData.nether(),
+                List.of(),
+                32,
+                false,
+                false,
+                false,
+                true);
+    }
+
+    public static NoiseGeneratorSettings overworldWithSeaLevel(BootstrapContext<?> context, boolean large, boolean amplified, int seaLevel) {
+        return new NoiseGeneratorSettings(
+                new NoiseSettings(-64, 384, 1, 2),
+                Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(),
+                NoiseRouterDataInvoker.invokeOverworld(context.lookup(Registries.DENSITY_FUNCTION), context.lookup(Registries.NOISE), amplified, large), SurfaceRuleData.overworld(),
+                new OverworldBiomeBuilder().spawnTarget(),
+                seaLevel,
+                false,
+                true,
+                true,
+                false);
+    }
+
+    protected static NoiseRouter overworld(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
+        DensityFunction $$4 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_BARRIER), 0.5);
+        DensityFunction $$5 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS), 0.67);
+        DensityFunction $$6 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_SPREAD), 0.7142857142857143);
+        DensityFunction $$7 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_LAVA));
+        DensityFunction $$8 = getFunction(densityFunctions, SHIFT_X);
+        DensityFunction $$9 = getFunction(densityFunctions, SHIFT_Z);
+        DensityFunction $$10 = DensityFunctions.shiftedNoise2d($$8, $$9, 0.25, noiseParameters.getOrThrow(Noises.TEMPERATURE));
+        DensityFunction $$11 = DensityFunctions.shiftedNoise2d($$8, $$9, 0.25, noiseParameters.getOrThrow(Noises.VEGETATION));
+        DensityFunction $$12 = getFunction(densityFunctions, FACTOR);
+        DensityFunction $$13 = getFunction(densityFunctions, DEPTH);
+        DensityFunction $$14 = noiseGradientDensity(DensityFunctions.cache2d($$12), $$13);
+
+        DensityFunction $$15 = getFunction(densityFunctions, SLOPED_CHEESE);
+        DensityFunction function0 = DensityFunctions.interpolated($$15);
+        DensityFunction function =  DensityFunctions.add(DensityFunctions.yClampedGradient(-32, 256, 100, -100),function0);//缩放统一为平原
+
+        return new NoiseRouter($$4, $$5, $$6, $$7, $$10, $$11, getFunction(densityFunctions, CONTINENTS), getFunction(densityFunctions, EROSION), $$13, getFunction(densityFunctions, RIDGES), slideOverworld(false, DensityFunctions.add($$14, DensityFunctions.constant(-0.703125)).clamp(-64.0, 64.0)), function, DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero());
+    }
+
+    private static final ResourceKey<DensityFunction> SHIFT_X = createKey("shift_x");
+    private static final ResourceKey<DensityFunction> SHIFT_Z = createKey("shift_z");
+    public static final ResourceKey<DensityFunction> CONTINENTS = createKey("overworld/continents");
+    public static final ResourceKey<DensityFunction> EROSION = createKey("overworld/erosion");
+    public static final ResourceKey<DensityFunction> RIDGES = createKey("overworld/ridges");
+    public static final ResourceKey<DensityFunction> FACTOR = createKey("overworld/factor");
+    public static final ResourceKey<DensityFunction> DEPTH = createKey("overworld/depth");
+    private static final ResourceKey<DensityFunction> SLOPED_CHEESE = createKey("overworld/sloped_cheese");
+    private static final ResourceKey<DensityFunction> ENTRANCES = createKey("overworld/caves/entrances");
+    private static final ResourceKey<DensityFunction> NOODLE = createKey("overworld/caves/noodle");
+
+    private static ResourceKey<DensityFunction> createKey(String location) {
+        return ResourceKey.create(Registries.DENSITY_FUNCTION, ResourceLocation.withDefaultNamespace(location));
+    }
+
+    private static DensityFunction slideOverworld(boolean amplified, DensityFunction densityFunction) {
+        return slide(densityFunction, -64, 384, amplified ? 16 : 80, amplified ? 0 : 64, -0.078125, 0, 24, amplified ? 0.4 : 0.1171875);
+    }
+
+    private static DensityFunction noiseGradientDensity(DensityFunction p_212272_, DensityFunction p_212273_) {
+        DensityFunction $$2 = DensityFunctions.mul(p_212273_, p_212272_);
+        return DensityFunctions.mul(DensityFunctions.constant(4.0), $$2.quarterNegative());
+    }
+
+    private static DensityFunction postProcess(DensityFunction p_224493_) {
+        DensityFunction $$1 = DensityFunctions.blendDensity(p_224493_);
+        return DensityFunctions.mul(DensityFunctions.interpolated($$1), DensityFunctions.constant(0.64)).squeeze();
+    }
+
+    private static DensityFunction slide(DensityFunction density, int minY, int maxY, int fromYTop, int toYTop, double offset1, int fromYBottom, int toYBottom, double offset2) {
+        DensityFunction topSlide = DensityFunctions.yClampedGradient(minY + maxY - fromYTop, minY + maxY - toYTop, 1, 0);
+        density = DensityFunctions.lerp(topSlide, offset1, density);
+        DensityFunction bottomSlide = DensityFunctions.yClampedGradient(minY + fromYBottom, minY + toYBottom, 0, 1);
+        return DensityFunctions.lerp(bottomSlide, offset2, density);
+    }
+
+    private static DensityFunction getFunction(HolderGetter<DensityFunction> densityFunctions, ResourceKey<DensityFunction> key) {
+        return new DensityFunctions.HolderHolder(densityFunctions.getOrThrow(key));
+    }
+
+}
