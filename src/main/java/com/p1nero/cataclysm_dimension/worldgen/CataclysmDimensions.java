@@ -1,7 +1,6 @@
-package com.p1nero.cataclysm_dimension.worldgen.dimension;
+package com.p1nero.cataclysm_dimension.worldgen;
 
 import com.p1nero.cataclysm_dimension.CataclysmDimension;
-import com.p1nero.cataclysm_dimension.worldgen.noise.CDNoiseSettings;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
@@ -9,7 +8,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.valueproviders.ConstantInt;
-import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.*;

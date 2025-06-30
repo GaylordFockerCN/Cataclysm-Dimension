@@ -1,4 +1,4 @@
-package com.p1nero.cataclysm_dimension.worldgen.noise;
+package com.p1nero.cataclysm_dimension.worldgen;
 
 import com.p1nero.cataclysm_dimension.CataclysmDimension;
 import com.p1nero.cataclysm_dimension.mixin.NoiseRouterDataInvoker;
