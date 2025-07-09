@@ -13,9 +13,8 @@ public class CataclysmDimensionMod {
     public static final String MOD_ID = "cataclysm_dimension";
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public CataclysmDimensionMod(IEventBus bus, ModContainer modContainer) {
+    public CataclysmDimensionMod(IEventBus bus) {
         CDPlacementTypes.STRUCTURE_PLACEMENT_TYPES.register(bus);
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
 }

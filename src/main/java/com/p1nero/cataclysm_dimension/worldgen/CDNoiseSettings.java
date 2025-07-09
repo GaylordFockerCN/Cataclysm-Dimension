@@ -98,7 +98,7 @@ public class CDNoiseSettings {
         return new NoiseGeneratorSettings(new NoiseSettings(-128, 384, 1, 1),
                 Blocks.NETHERRACK.defaultBlockState(),
                 Blocks.LAVA.defaultBlockState(),
-                overworldZIP2(densityFunctions, noiseParameters),
+                soulNoiseRouter(densityFunctions, noiseParameters),
                 CDSurfaceRuleData.nether(),
                 List.of(),
                 64,
@@ -112,22 +112,6 @@ public class CDNoiseSettings {
         return new NoiseGeneratorSettings(
                 new NoiseSettings(-128, 384, 1, 1),
                 Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(),
-                overworldZIP2(densityFunctions, noiseParameters),
-                CDSurfaceRuleData.overworld(),
-                (new OverworldBiomeBuilder()).spawnTarget(),
-                63,
-                false,
-                true,
-                true,
-                false);
-    }
-
-
-
-    public static NoiseGeneratorSettings burningArena(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
-        return new NoiseGeneratorSettings(
-                new NoiseSettings(-128, 384, 1, 1),
-                Blocks.NETHERRACK.defaultBlockState(), Blocks.LAVA.defaultBlockState(),
                 overworldZIP2(densityFunctions, noiseParameters),
                 CDSurfaceRuleData.overworld(),
                 (new OverworldBiomeBuilder()).spawnTarget(),
@@ -173,6 +157,26 @@ public class CDNoiseSettings {
     }
 
     protected static NoiseRouter overworldZIP2(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
+        DensityFunction $$4 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_BARRIER), 0.2);
+        DensityFunction $$5 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS), 0.37);
+        DensityFunction $$6 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_SPREAD), 0.7142857142857143);
+        DensityFunction $$7 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_LAVA));
+        DensityFunction $$8 = getFunction(densityFunctions, SHIFT_X);
+        DensityFunction $$9 = getFunction(densityFunctions, SHIFT_Z);
+        DensityFunction $$10 = DensityFunctions.shiftedNoise2d($$8, $$9, 0.25, noiseParameters.getOrThrow(Noises.TEMPERATURE));
+        DensityFunction $$11 = DensityFunctions.shiftedNoise2d($$8, $$9, 0.25, noiseParameters.getOrThrow(Noises.VEGETATION));
+        DensityFunction $$12 = getFunction(densityFunctions, FACTOR);
+        DensityFunction $$13 = getFunction(densityFunctions, DEPTH);
+        DensityFunction $$14 = noiseGradientDensity(DensityFunctions.cache2d($$12), $$13);
+
+        DensityFunction $$15 = getFunction(densityFunctions, CONTINENTS);
+        DensityFunction function =  DensityFunctions.add(DensityFunctions.yClampedGradient(-64, 0, 1.3, -1.5), $$15);
+
+        return new NoiseRouter($$4, $$5, $$6, $$7, $$10, $$11, getFunction(densityFunctions, CONTINENTS), getFunction(densityFunctions, EROSION), $$13, getFunction(densityFunctions, RIDGES), slideOverworld(false, DensityFunctions.add($$14, DensityFunctions.constant(-0.703125)).clamp(-32.0, 32.0)), function, DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero());
+    }
+
+
+    protected static NoiseRouter soulNoiseRouter(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
         DensityFunction $$4 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_BARRIER), 0.2);
         DensityFunction $$5 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS), 0.37);
         DensityFunction $$6 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_SPREAD), 0.7142857142857143);
