@@ -1,6 +1,6 @@
 package com.p1nero.cataclysm_dimension.worldgen;
 
-import com.p1nero.cataclysm_dimension.CataclysmDimension;
+import com.p1nero.cataclysm_dimension.CataclysmDimensionMod;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
@@ -19,6 +19,6 @@ public class CDWorldGenProvider extends DatapackBuiltinEntriesProvider {
             .add(Registries.LEVEL_STEM, CataclysmDimensions::bootstrapStem);;
 
     public CDWorldGenProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries, BUILDER, Set.of(CataclysmDimension.MOD_ID));
+        super(output, registries, BUILDER, Set.of(CataclysmDimensionMod.MOD_ID));
     }
 }

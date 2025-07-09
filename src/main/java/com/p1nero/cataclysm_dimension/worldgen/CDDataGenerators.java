@@ -1,6 +1,6 @@
 package com.p1nero.cataclysm_dimension.worldgen;
 
-import com.p1nero.cataclysm_dimension.CataclysmDimension;
+import com.p1nero.cataclysm_dimension.CataclysmDimensionMod;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -11,7 +11,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 import java.util.concurrent.CompletableFuture;
 
-@EventBusSubscriber(modid = CataclysmDimension.MOD_ID)
+@EventBusSubscriber(modid = CataclysmDimensionMod.MOD_ID)
 public class CDDataGenerators {
 
     @SubscribeEvent

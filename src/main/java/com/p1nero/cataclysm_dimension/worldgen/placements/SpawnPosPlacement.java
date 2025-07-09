@@ -23,6 +23,11 @@ public class SpawnPosPlacement extends StructurePlacement {
     }
 
     @Override
+    public boolean isStructureChunk(@NotNull ChunkGeneratorStructureState structureState, int x, int z) {
+        return isPlacementChunk(structureState, x, z);
+    }
+
+    @Override
     public @NotNull StructurePlacementType<?> type() {
         return CDPlacementTypes.SPAWN_POS_PLACEMENT.get();
     }

@@ -1,6 +1,6 @@
 {
   "type": "cataclysm:cursed_pyramid",
-  "biomes": "#cataclysm:has_structure/cursed_pyramid_biomes",
+  "biomes": "cataclysm_dimension:desert",
   "step": "surface_structures",
   "liquid_settings": "ignore_waterlogging",
   "project_start_to_heightmap": "WORLD_SURFACE_WG",

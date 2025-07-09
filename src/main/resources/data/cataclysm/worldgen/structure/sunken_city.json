@@ -1,6 +1,6 @@
 {
   "type": "cataclysm:sunken_city",
-  "biomes": "#cataclysm:has_structure/sunken_city_biomes",
+  "biomes": "cataclysm_dimension:deep_ocean",
   "step": "surface_structures",
   "liquid_settings": "ignore_waterlogging",
   "start_height": {

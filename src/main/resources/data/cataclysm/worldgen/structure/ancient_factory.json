@@ -1,13 +1,13 @@
 {
   "type": "cataclysm:cataclysm_jigsaw",
-  "biomes": "#cataclysm:has_structure/ancient_factory_biomes",
+  "biomes": "cataclysm_dimension:badlands",
   "step": "underground_decoration",
   "start_pool": "cataclysm:ancient_factory/start_pool",
   "liquid_settings": "ignore_waterlogging",
   "terrain_adaptation": "beard_box",
   "size": 10,
   "start_height": {
-    "absolute": -30
+    "absolute": 90
   },
   "max_distance_from_center": 72,
   "spawn_overrides": {

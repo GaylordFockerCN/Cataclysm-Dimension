@@ -1,7 +1,7 @@
 {
   "type": "cataclysm:cataclysm_jigsaw",
   "start_pool": "cataclysm:soul_black_smith/start_pool",
-  "biomes": "#cataclysm:has_structure/soul_black_smith_biomes",
+  "biomes": "cataclysm_dimension:soul_sand_valley",
   "max_distance_from_center": 80,
   "size": 8,
   "spawn_overrides": {
@@ -12,7 +12,7 @@
     }
   },
   "start_height": {
-    "absolute": 64
+    "absolute": 96
   },
   "step": "surface_structures",
   "use_expansion_hack": false

@@ -1,11 +1,10 @@
 package com.p1nero.cataclysm_dimension.worldgen;
 
-import com.p1nero.cataclysm_dimension.CataclysmDimension;
+import com.p1nero.cataclysm_dimension.CataclysmDimensionMod;
 import com.p1nero.cataclysm_dimension.mixin.NoiseRouterDataInvoker;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
-import net.minecraft.data.worldgen.SurfaceRuleData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.OverworldBiomeBuilder;
@@ -19,11 +18,14 @@ import java.util.List;
 public class CDNoiseSettings {
     public static final ResourceKey<NoiseGeneratorSettings> PLAIN = createNoiseGeneratorKey("plain_noise_gen");
     public static final ResourceKey<NoiseGeneratorSettings> SEA = createNoiseGeneratorKey("sea");
+    public static final ResourceKey<NoiseGeneratorSettings> DEEP_SEA = createNoiseGeneratorKey("deep_sea");
     public static final ResourceKey<NoiseGeneratorSettings> DESERT = createNoiseGeneratorKey("no_sea");
-    public static final ResourceKey<NoiseGeneratorSettings> BIG_NETHER = createNoiseGeneratorKey("big_nether");
+    public static final ResourceKey<NoiseGeneratorSettings> ARENA = createNoiseGeneratorKey("arena");
+    public static final ResourceKey<NoiseGeneratorSettings> SOUL = createNoiseGeneratorKey("soul");
+    public static final ResourceKey<NoiseGeneratorSettings> AIR = createNoiseGeneratorKey("air");
 
     private static ResourceKey<NoiseGeneratorSettings> createNoiseGeneratorKey(String name) {
-        return ResourceKey.create(Registries.NOISE_SETTINGS, ResourceLocation.fromNamespaceAndPath(CataclysmDimension.MOD_ID, name));
+        return ResourceKey.create(Registries.NOISE_SETTINGS, ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, name));
     }
 
     public static void bootstrap(BootstrapContext<NoiseGeneratorSettings> context) {
@@ -31,16 +33,29 @@ public class CDNoiseSettings {
         HolderGetter<NormalNoise.NoiseParameters> noise = context.lookup(Registries.NOISE);
         context.register(PLAIN, plainNoise(densityFunctions, noise));
         context.register(SEA, overworldWithSeaLevel(context, false, false, 128));
+        context.register(DEEP_SEA, sunkenCity(densityFunctions, noise));
         context.register(DESERT, plainDesert(densityFunctions, noise));
-        context.register(BIG_NETHER, bigNether(context));
+        context.register(ARENA, arena(densityFunctions, noise));
+        context.register(SOUL, soul(densityFunctions, noise));
+        context.register(AIR, new NoiseGeneratorSettings(new NoiseSettings(0, 128, 2, 1),
+                Blocks.AIR.defaultBlockState(),
+                Blocks.AIR.defaultBlockState(),
+                new NoiseRouter(DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero()),
+                CDSurfaceRuleData.air(),
+                List.of(),
+                0,
+                true,
+                false,
+                false,
+                true));
     }
 
     public static NoiseGeneratorSettings plainNoise(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
         return new NoiseGeneratorSettings(
                 new NoiseSettings(32, 256, 1, 2),
                 Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(),
-                overworld(densityFunctions, noiseParameters),
-                SurfaceRuleData.overworld(), (new OverworldBiomeBuilder()).spawnTarget(),
+                overworldZIP(densityFunctions, noiseParameters),
+                CDSurfaceRuleData.overworld(), (new OverworldBiomeBuilder()).spawnTarget(),
                 63,
                 false,
                 true,
@@ -53,8 +68,9 @@ public class CDNoiseSettings {
         return new NoiseGeneratorSettings(
                 new NoiseSettings(32, 256, 1, 2),
                 Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(),
-                overworld(densityFunctions, noiseParameters),
-                SurfaceRuleData.overworld(), (new OverworldBiomeBuilder()).spawnTarget(),
+                overworldZIP(densityFunctions, noiseParameters),
+                CDSurfaceRuleData.overworld(),
+                (new OverworldBiomeBuilder()).spawnTarget(),
                 -128,
                 false,
                 true,
@@ -62,12 +78,12 @@ public class CDNoiseSettings {
                 false);
     }
 
-    public static NoiseGeneratorSettings bigNether(BootstrapContext<?> context) {
-        return new NoiseGeneratorSettings( new NoiseSettings(-64, 384, 1, 2),
+    public static NoiseGeneratorSettings arena(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
+        return new NoiseGeneratorSettings(new NoiseSettings(0, 128, 1, 1),
                 Blocks.NETHERRACK.defaultBlockState(),
                 Blocks.LAVA.defaultBlockState(),
-                NoiseRouterDataInvoker.invokeNether(context.lookup(Registries.DENSITY_FUNCTION), context.lookup(Registries.NOISE)),
-                SurfaceRuleData.nether(),
+                NoiseRouterDataInvoker.invokeNether(densityFunctions, noiseParameters),
+                CDSurfaceRuleData.nether(),
                 List.of(),
                 32,
                 false,
@@ -76,11 +92,58 @@ public class CDNoiseSettings {
                 true);
     }
 
+
+
+    public static NoiseGeneratorSettings soul(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
+        return new NoiseGeneratorSettings(new NoiseSettings(-128, 384, 1, 1),
+                Blocks.NETHERRACK.defaultBlockState(),
+                Blocks.LAVA.defaultBlockState(),
+                overworldZIP2(densityFunctions, noiseParameters),
+                CDSurfaceRuleData.nether(),
+                List.of(),
+                64,
+                false,
+                false,
+                false,
+                true);
+    }
+
+    public static NoiseGeneratorSettings sunkenCity(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
+        return new NoiseGeneratorSettings(
+                new NoiseSettings(-128, 384, 1, 1),
+                Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(),
+                overworldZIP2(densityFunctions, noiseParameters),
+                CDSurfaceRuleData.overworld(),
+                (new OverworldBiomeBuilder()).spawnTarget(),
+                63,
+                false,
+                true,
+                true,
+                false);
+    }
+
+
+
+    public static NoiseGeneratorSettings burningArena(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
+        return new NoiseGeneratorSettings(
+                new NoiseSettings(-128, 384, 1, 1),
+                Blocks.NETHERRACK.defaultBlockState(), Blocks.LAVA.defaultBlockState(),
+                overworldZIP2(densityFunctions, noiseParameters),
+                CDSurfaceRuleData.overworld(),
+                (new OverworldBiomeBuilder()).spawnTarget(),
+                63,
+                false,
+                true,
+                true,
+                false);
+    }
+
     public static NoiseGeneratorSettings overworldWithSeaLevel(BootstrapContext<?> context, boolean large, boolean amplified, int seaLevel) {
         return new NoiseGeneratorSettings(
                 new NoiseSettings(-64, 384, 1, 2),
                 Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(),
-                NoiseRouterDataInvoker.invokeOverworld(context.lookup(Registries.DENSITY_FUNCTION), context.lookup(Registries.NOISE), amplified, large), SurfaceRuleData.overworld(),
+                NoiseRouterDataInvoker.invokeOverworld(context.lookup(Registries.DENSITY_FUNCTION), context.lookup(Registries.NOISE), amplified, large),
+                CDSurfaceRuleData.overworld(),
                 new OverworldBiomeBuilder().spawnTarget(),
                 seaLevel,
                 false,
@@ -89,7 +152,7 @@ public class CDNoiseSettings {
                 false);
     }
 
-    protected static NoiseRouter overworld(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
+    protected static NoiseRouter overworldZIP(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
         DensityFunction $$4 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_BARRIER), 0.5);
         DensityFunction $$5 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS), 0.67);
         DensityFunction $$6 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_SPREAD), 0.7142857142857143);
@@ -104,9 +167,28 @@ public class CDNoiseSettings {
 
         DensityFunction $$15 = getFunction(densityFunctions, SLOPED_CHEESE);
         DensityFunction function0 = DensityFunctions.interpolated($$15);
-        DensityFunction function =  DensityFunctions.add(DensityFunctions.yClampedGradient(-32, 256, 100, -100),function0);//缩放统一为平原
+        DensityFunction function =  DensityFunctions.add(DensityFunctions.yClampedGradient(-32, 256, 100, -100), function0);//缩放统一为平原
 
         return new NoiseRouter($$4, $$5, $$6, $$7, $$10, $$11, getFunction(densityFunctions, CONTINENTS), getFunction(densityFunctions, EROSION), $$13, getFunction(densityFunctions, RIDGES), slideOverworld(false, DensityFunctions.add($$14, DensityFunctions.constant(-0.703125)).clamp(-64.0, 64.0)), function, DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero());
+    }
+
+    protected static NoiseRouter overworldZIP2(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
+        DensityFunction $$4 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_BARRIER), 0.2);
+        DensityFunction $$5 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS), 0.37);
+        DensityFunction $$6 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_SPREAD), 0.7142857142857143);
+        DensityFunction $$7 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_LAVA));
+        DensityFunction $$8 = getFunction(densityFunctions, SHIFT_X);
+        DensityFunction $$9 = getFunction(densityFunctions, SHIFT_Z);
+        DensityFunction $$10 = DensityFunctions.shiftedNoise2d($$8, $$9, 0.25, noiseParameters.getOrThrow(Noises.TEMPERATURE));
+        DensityFunction $$11 = DensityFunctions.shiftedNoise2d($$8, $$9, 0.25, noiseParameters.getOrThrow(Noises.VEGETATION));
+        DensityFunction $$12 = getFunction(densityFunctions, FACTOR);
+        DensityFunction $$13 = getFunction(densityFunctions, DEPTH);
+        DensityFunction $$14 = noiseGradientDensity(DensityFunctions.cache2d($$12), $$13);
+
+        DensityFunction $$15 = getFunction(densityFunctions, SLOPED_CHEESE);
+        DensityFunction function0 = DensityFunctions.interpolated($$15);
+
+        return new NoiseRouter($$4, $$5, $$6, $$7, $$10, $$11, getFunction(densityFunctions, CONTINENTS), getFunction(densityFunctions, EROSION), $$13, getFunction(densityFunctions, RIDGES), slideOverworld(false, DensityFunctions.add($$14, DensityFunctions.constant(-0.703125)).clamp(-32.0, 16.0)), function0, DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero());
     }
 
     private static final ResourceKey<DensityFunction> SHIFT_X = createKey("shift_x");

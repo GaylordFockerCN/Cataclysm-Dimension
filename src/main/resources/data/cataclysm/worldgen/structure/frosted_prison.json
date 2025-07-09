@@ -1,6 +1,6 @@
 {
   "type": "cataclysm:cataclysm_jigsaw",
-  "biomes": "#cataclysm:has_structure/frosted_prison_biomes",
+  "biomes": "cataclysm_dimension:snowy_plains",
   "step": "surface_structures",
   "start_pool": "cataclysm:frosted_prison/start_pool",
   "liquid_settings": "ignore_waterlogging",
