@@ -33,10 +33,10 @@ public class CDNoiseSettings {
         HolderGetter<NormalNoise.NoiseParameters> noise = context.lookup(Registries.NOISE);
         context.register(PLAIN, plainNoise(densityFunctions, noise));
         context.register(SEA, overworldWithSeaLevel(context, false, false, 128));
-        context.register(DEEP_SEA, sunkenCity(densityFunctions, noise));
+//        context.register(DEEP_SEA, sunkenCity(densityFunctions, noise));
         context.register(DESERT, plainDesert(densityFunctions, noise));
         context.register(ARENA, arena(densityFunctions, noise));
-        context.register(SOUL, soul(densityFunctions, noise));
+        context.register(SOUL, arena(densityFunctions, noise));
         context.register(AIR, new NoiseGeneratorSettings(new NoiseSettings(0, 128, 2, 1),
                 Blocks.AIR.defaultBlockState(),
                 Blocks.AIR.defaultBlockState(),
@@ -82,7 +82,7 @@ public class CDNoiseSettings {
         return new NoiseGeneratorSettings(new NoiseSettings(0, 128, 1, 1),
                 Blocks.NETHERRACK.defaultBlockState(),
                 Blocks.LAVA.defaultBlockState(),
-                NoiseRouterDataInvoker.invokeNether(densityFunctions, noiseParameters),
+                nether(densityFunctions, noiseParameters),
                 CDSurfaceRuleData.nether(),
                 List.of(),
                 32,
@@ -177,8 +177,8 @@ public class CDNoiseSettings {
 
 
     protected static NoiseRouter soulNoiseRouter(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
-        DensityFunction $$4 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_BARRIER), 0.2);
-        DensityFunction $$5 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS), 0.37);
+        DensityFunction $$4 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_BARRIER), 0.5);
+        DensityFunction $$5 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS), 0.67);
         DensityFunction $$6 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_SPREAD), 0.7142857142857143);
         DensityFunction $$7 = DensityFunctions.noise(noiseParameters.getOrThrow(Noises.AQUIFER_LAVA));
         DensityFunction $$8 = getFunction(densityFunctions, SHIFT_X);
@@ -192,7 +192,24 @@ public class CDNoiseSettings {
         DensityFunction $$15 = getFunction(densityFunctions, SLOPED_CHEESE);
         DensityFunction function0 = DensityFunctions.interpolated($$15);
 
-        return new NoiseRouter($$4, $$5, $$6, $$7, $$10, $$11, getFunction(densityFunctions, CONTINENTS), getFunction(densityFunctions, EROSION), $$13, getFunction(densityFunctions, RIDGES), slideOverworld(false, DensityFunctions.add($$14, DensityFunctions.constant(-0.703125)).clamp(-32.0, 16.0)), function0, DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero());
+        return new NoiseRouter($$4, $$5, $$6, $$7, $$10, $$11, getFunction(densityFunctions, CONTINENTS), getFunction(densityFunctions, EROSION), $$13, getFunction(densityFunctions, RIDGES), slideOverworld(false, DensityFunctions.add($$14, DensityFunctions.constant(-0.703125)).clamp(-32.0, 32.0)), function0, DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero());
+    }
+
+    protected static NoiseRouter nether(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters) {
+        return noNewCaves(densityFunctions, noiseParameters, slideNetherLike(densityFunctions, 0, 128));
+    }
+
+    private static DensityFunction slideNetherLike(HolderGetter<DensityFunction> densityFunctions, int minY, int maxY) {
+        return slide(getFunction(densityFunctions, MY_BASE_3D_NOISE_NETHER), minY, maxY, 24, 0, 0.9375F, -8, 24, (double)2.5F);
+    }
+
+    private static NoiseRouter noNewCaves(HolderGetter<DensityFunction> densityFunctions, HolderGetter<NormalNoise.NoiseParameters> noiseParameters, DensityFunction p_256378_) {
+        DensityFunction densityfunction = getFunction(densityFunctions, SHIFT_X);
+        DensityFunction densityfunction1 = getFunction(densityFunctions, SHIFT_Z);
+        DensityFunction densityfunction2 = DensityFunctions.shiftedNoise2d(densityfunction, densityfunction1, (double)0.25F, noiseParameters.getOrThrow(Noises.TEMPERATURE));
+        DensityFunction densityfunction3 = DensityFunctions.shiftedNoise2d(densityfunction, densityfunction1, (double)0.25F, noiseParameters.getOrThrow(Noises.VEGETATION));
+        DensityFunction densityfunction4 = postProcess(p_256378_);
+        return new NoiseRouter(DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), densityfunction2, densityfunction3, DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), densityfunction4, DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero());
     }
 
     private static final ResourceKey<DensityFunction> SHIFT_X = createKey("shift_x");
@@ -203,8 +220,7 @@ public class CDNoiseSettings {
     public static final ResourceKey<DensityFunction> FACTOR = createKey("overworld/factor");
     public static final ResourceKey<DensityFunction> DEPTH = createKey("overworld/depth");
     private static final ResourceKey<DensityFunction> SLOPED_CHEESE = createKey("overworld/sloped_cheese");
-    private static final ResourceKey<DensityFunction> ENTRANCES = createKey("overworld/caves/entrances");
-    private static final ResourceKey<DensityFunction> NOODLE = createKey("overworld/caves/noodle");
+    private static final ResourceKey<DensityFunction> MY_BASE_3D_NOISE_NETHER = ResourceKey.create(Registries.DENSITY_FUNCTION, ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "nether/base_3d_noise"));
 
     private static ResourceKey<DensityFunction> createKey(String location) {
         return ResourceKey.create(Registries.DENSITY_FUNCTION, ResourceLocation.withDefaultNamespace(location));

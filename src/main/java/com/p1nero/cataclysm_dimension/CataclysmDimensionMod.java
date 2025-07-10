@@ -3,9 +3,7 @@ package com.p1nero.cataclysm_dimension;
 import com.mojang.logging.LogUtils;
 import com.p1nero.cataclysm_dimension.worldgen.placements.CDPlacementTypes;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import org.slf4j.Logger;
 
 @Mod(CataclysmDimensionMod.MOD_ID)

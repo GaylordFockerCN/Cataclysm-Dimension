@@ -12,7 +12,7 @@
     }
   },
   "start_height": {
-    "absolute": 96
+    "absolute": 64
   },
   "step": "surface_structures",
   "use_expansion_hack": false
