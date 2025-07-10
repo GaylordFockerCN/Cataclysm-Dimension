@@ -2,7 +2,7 @@ package com.p1nero.cataclysm_dimension.worldgen;
 
 import com.p1nero.cataclysm_dimension.CataclysmDimensionMod;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.*;
@@ -18,13 +18,13 @@ public class CDBiomes {
     public static final ResourceKey<Biome> WARM_OCEAN = register("warm_ocean");
     public static final ResourceKey<Biome> SNOWY_PLAINS = register("snowy_plains");
     public static ResourceKey<Biome> register(String name){
-        return ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, name));
+        return ResourceKey.create(Registries.BIOME, new ResourceLocation(CataclysmDimensionMod.MOD_ID, name));
     }
 
     /**
      * 就那么几个群系，复制粘贴改现成的数据包更方便= =
      */
-    public static void boostrap(BootstrapContext<Biome> context) {
+    public static void boostrap(BootstapContext<Biome> context) {
     }
 
 }

@@ -4,7 +4,7 @@ import com.p1nero.cataclysm_dimension.CataclysmDimensionMod;
 import com.p1nero.cataclysm_dimension.mixin.NoiseRouterDataInvoker;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.OverworldBiomeBuilder;
@@ -25,10 +25,10 @@ public class CDNoiseSettings {
     public static final ResourceKey<NoiseGeneratorSettings> AIR = createNoiseGeneratorKey("air");
 
     private static ResourceKey<NoiseGeneratorSettings> createNoiseGeneratorKey(String name) {
-        return ResourceKey.create(Registries.NOISE_SETTINGS, ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, name));
+        return ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation(CataclysmDimensionMod.MOD_ID, name));
     }
 
-    public static void bootstrap(BootstrapContext<NoiseGeneratorSettings> context) {
+    public static void bootstrap(BootstapContext<NoiseGeneratorSettings> context) {
         HolderGetter<DensityFunction> densityFunctions = context.lookup(Registries.DENSITY_FUNCTION);
         HolderGetter<NormalNoise.NoiseParameters> noise = context.lookup(Registries.NOISE);
         context.register(PLAIN, plainNoise(densityFunctions, noise));
@@ -122,7 +122,7 @@ public class CDNoiseSettings {
                 false);
     }
 
-    public static NoiseGeneratorSettings overworldWithSeaLevel(BootstrapContext<?> context, boolean large, boolean amplified, int seaLevel) {
+    public static NoiseGeneratorSettings overworldWithSeaLevel(BootstapContext<?> context, boolean large, boolean amplified, int seaLevel) {
         return new NoiseGeneratorSettings(
                 new NoiseSettings(-64, 384, 1, 2),
                 Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(),
@@ -220,10 +220,10 @@ public class CDNoiseSettings {
     public static final ResourceKey<DensityFunction> FACTOR = createKey("overworld/factor");
     public static final ResourceKey<DensityFunction> DEPTH = createKey("overworld/depth");
     private static final ResourceKey<DensityFunction> SLOPED_CHEESE = createKey("overworld/sloped_cheese");
-    private static final ResourceKey<DensityFunction> MY_BASE_3D_NOISE_NETHER = ResourceKey.create(Registries.DENSITY_FUNCTION, ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "nether/base_3d_noise"));
+    private static final ResourceKey<DensityFunction> MY_BASE_3D_NOISE_NETHER = ResourceKey.create(Registries.DENSITY_FUNCTION, new ResourceLocation(CataclysmDimensionMod.MOD_ID, "nether/base_3d_noise"));
 
     private static ResourceKey<DensityFunction> createKey(String location) {
-        return ResourceKey.create(Registries.DENSITY_FUNCTION, ResourceLocation.withDefaultNamespace(location));
+        return ResourceKey.create(Registries.DENSITY_FUNCTION, new ResourceLocation(location));
     }
 
     private static DensityFunction slideOverworld(boolean amplified, DensityFunction densityFunction) {

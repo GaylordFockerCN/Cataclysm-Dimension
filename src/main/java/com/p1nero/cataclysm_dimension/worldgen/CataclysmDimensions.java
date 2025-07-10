@@ -3,7 +3,7 @@ package com.p1nero.cataclysm_dimension.worldgen;
 import com.p1nero.cataclysm_dimension.CataclysmDimensionMod;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -21,69 +21,69 @@ import java.util.OptionalLong;
 public class CataclysmDimensions {
     //远古工厂 (Ancient Factory) 恶地
     public static final ResourceKey<LevelStem> CATACLYSM_FORGE_OF_AEONS_KEY = ResourceKey.create(Registries.LEVEL_STEM,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_forge_of_aeons"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_forge_of_aeons"));
     public static final ResourceKey<Level> CATACLYSM_FORGE_OF_AEONS_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_forge_of_aeons"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_forge_of_aeons"));
     public static final ResourceKey<DimensionType> CATACLYSM_FORGE_OF_AEONS_DIM_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_forge_of_aeons_type"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_forge_of_aeons_type"));
 
     //沉沦之城 (Sunken City)海洋
     public static final ResourceKey<LevelStem> CATACLYSM_ABYSSAL_DEPTHS_KEY = ResourceKey.create(Registries.LEVEL_STEM,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_abyssal_depths"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_abyssal_depths"));
     public static final ResourceKey<Level> CATACLYSM_ABYSSAL_DEPTHS_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_abyssal_depths"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_abyssal_depths"));
     public static final ResourceKey<DimensionType> CATACLYSM_ABYSSAL_DEPTHS_DIM_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_abyssal_depths_type"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_abyssal_depths_type"));
 
     //被诅咒的金字塔 (Cursed Pyramid)沙漠
     public static final ResourceKey<LevelStem> CATACLYSM_PHARAOHS_BANE_KEY = ResourceKey.create(Registries.LEVEL_STEM,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_pharaohs_bane"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_pharaohs_bane"));
     public static final ResourceKey<Level> CATACLYSM_PHARAOHS_BANE_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_pharaohs_bane"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_pharaohs_bane"));
     public static final ResourceKey<DimensionType> CATACLYSM_PHARAOHS_BANE_DIM_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_pharaohs_bane_type"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_pharaohs_bane_type"));
 
     //苦寒监牢 (Frosted Prison)雪原
     public static final ResourceKey<LevelStem> CATACLYSM_ETERNAL_FROSTHOLD_KEY = ResourceKey.create(Registries.LEVEL_STEM,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_eternal_frosthold"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_eternal_frosthold"));
     public static final ResourceKey<Level> CATACLYSM_ETERNAL_FROSTHOLD_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_eternal_frosthold"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_eternal_frosthold"));
     public static final ResourceKey<DimensionType> CATACLYSM_ETERNAL_FROSTHOLD_DIM_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_eternal_frosthold_type"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_eternal_frosthold_type"));
 
     //卫城 (Acropolis)温水海洋
     public static final ResourceKey<LevelStem> CATACLYSM_SANCTUM_FALLEN_KEY = ResourceKey.create(Registries.LEVEL_STEM,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_sanctum_fallen"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_sanctum_fallen"));
     public static final ResourceKey<Level> CATACLYSM_SANCTUM_FALLEN_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_sanctum_fallen"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_sanctum_fallen"));
     public static final ResourceKey<DimensionType> CATACLYSM_SANCTUM_FALLEN_DIM_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_sanctum_fallen_type"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_sanctum_fallen_type"));
 
     //灵魂锻造厂 (Soul Black Smith)灵魂沙峡谷
     public static final ResourceKey<LevelStem> CATACLYSM_SOULS_ANVIL_KEY = ResourceKey.create(Registries.LEVEL_STEM,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_souls_anvil"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_souls_anvil"));
     public static final ResourceKey<Level> CATACLYSM_SOULS_ANVIL_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_souls_anvil"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_souls_anvil"));
     public static final ResourceKey<DimensionType> CATACLYSM_SOULS_ANVIL_DIM_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_souls_anvil_type"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_souls_anvil_type"));
 
     //熔岩竞技场 (Burning Arena)地狱
     public static final ResourceKey<LevelStem> CATACLYSM_INFERNOS_MAW_KEY = ResourceKey.create(Registries.LEVEL_STEM,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_infernos_maw"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_infernos_maw"));
     public static final ResourceKey<Level> CATACLYSM_INFERNOS_MAW_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_infernos_maw"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_infernos_maw"));
     public static final ResourceKey<DimensionType> CATACLYSM_INFERNOS_MAW_DIM_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_infernos_maw_type"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_infernos_maw_type"));
 
     //废弃堡垒 (Ruined Citadel)末地
     public static final ResourceKey<LevelStem> CATACLYSM_BASTION_LOST_KEY = ResourceKey.create(Registries.LEVEL_STEM,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_bastion_lost"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_bastion_lost"));
     public static final ResourceKey<Level> CATACLYSM_BASTION_LOST_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_bastion_lost"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_bastion_lost"));
     public static final ResourceKey<DimensionType> CATACLYSM_BASTION_LOST_DIM_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,
-            ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "cataclysm_bastion_lost_type"));
+            new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_bastion_lost_type"));
 
-    public static void bootstrapType(BootstrapContext<DimensionType> context) {
+    public static void bootstrapType(BootstapContext<DimensionType> context) {
         // 远古工厂 - 恶地维度 (类似主世界)
         context.register(CATACLYSM_FORGE_OF_AEONS_DIM_TYPE, new DimensionType(
                 OptionalLong.empty(),       // 跟随主世界时间
@@ -229,7 +229,7 @@ public class CataclysmDimensions {
                 new DimensionType.MonsterSettings(false, false, ConstantInt.of(0), 0)));
     }
 
-    public static void bootstrapStem(BootstrapContext<LevelStem> context) {
+    public static void bootstrapStem(BootstapContext<LevelStem> context) {
         HolderGetter<Biome> biomeRegistry = context.lookup(Registries.BIOME);
         HolderGetter<DimensionType> dimTypes = context.lookup(Registries.DIMENSION_TYPE);
         HolderGetter<NoiseGeneratorSettings> noiseGenSettings = context.lookup(Registries.NOISE_SETTINGS);
