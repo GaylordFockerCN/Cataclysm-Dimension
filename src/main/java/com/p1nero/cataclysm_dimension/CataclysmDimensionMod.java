@@ -10,6 +10,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -84,6 +86,8 @@ public class CataclysmDimensionMod {
             if(flag) {
                 if(entity instanceof Player player) {
                     player.getCooldowns().addCooldown(itemStack.getItem(), 600);
+                    player.level().playSound(null, entity.getX(), entity.getY() + 0.75, entity.getZ(), SoundEvents.PORTAL_TRAVEL, SoundSource.BLOCKS, 1.0F, 1.0F);
+
                 }
             }
         }
