@@ -4,7 +4,6 @@
   "package": "com.p1nero.cataclysm_dimension.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "NoiseRouterDataInvoker"
   ],
   "client": [
   ],

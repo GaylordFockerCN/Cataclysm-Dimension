@@ -7,9 +7,12 @@ import com.p1nero.cataclysm_dimension.worldgen.portal.CDNetherTeleporter;
 import com.p1nero.cataclysm_dimension.worldgen.portal.CDTeleporter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -84,9 +87,9 @@ public class CataclysmDimensionMod {
                 flag = false;
             }
             if(flag) {
-                if(entity instanceof Player player) {
+                if(entity instanceof ServerPlayer player) {
                     player.getCooldowns().addCooldown(itemStack.getItem(), 600);
-                    player.level().playSound(null, entity.getX(), entity.getY() + 0.75, entity.getZ(), SoundEvents.PORTAL_TRAVEL, SoundSource.BLOCKS, 1.0F, 1.0F);
+                    player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.PORTAL_TRAVEL), SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0F, 1.0F, player.getRandom().nextInt()));
 
                 }
             }
