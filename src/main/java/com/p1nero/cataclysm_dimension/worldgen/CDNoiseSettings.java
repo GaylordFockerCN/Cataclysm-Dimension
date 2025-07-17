@@ -1,7 +1,6 @@
 package com.p1nero.cataclysm_dimension.worldgen;
 
 import com.p1nero.cataclysm_dimension.CataclysmDimensionMod;
-import com.p1nero.cataclysm_dimension.mixin.NoiseRouterDataInvoker;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
@@ -126,7 +125,7 @@ public class CDNoiseSettings {
         return new NoiseGeneratorSettings(
                 new NoiseSettings(-64, 384, 1, 2),
                 Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(),
-                NoiseRouterDataInvoker.invokeOverworld(context.lookup(Registries.DENSITY_FUNCTION), context.lookup(Registries.NOISE), amplified, large),
+                NoiseRouterData.overworld(context.lookup(Registries.DENSITY_FUNCTION), context.lookup(Registries.NOISE), amplified, large),
                 CDSurfaceRuleData.overworld(),
                 new OverworldBiomeBuilder().spawnTarget(),
                 seaLevel,
