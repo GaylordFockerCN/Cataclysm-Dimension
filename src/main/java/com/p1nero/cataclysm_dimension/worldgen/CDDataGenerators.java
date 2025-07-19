@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.concurrent.CompletableFuture;
 
-@Mod.EventBusSubscriber(modid = CataclysmDimensionMod.MOD_ID)
+@Mod.EventBusSubscriber(modid = CataclysmDimensionMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class CDDataGenerators {
 
     @SubscribeEvent
