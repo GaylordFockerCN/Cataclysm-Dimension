@@ -1,0 +1,11 @@
+{
+  "type": "cataclysm_dimension:cataclysm_forge_of_aeons_type",
+  "generator": {
+    "type": "minecraft:noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "cataclysm_dimension:badlands"
+    },
+    "settings": "cataclysm_dimension:plain_noise_gen"
+  }
+}
