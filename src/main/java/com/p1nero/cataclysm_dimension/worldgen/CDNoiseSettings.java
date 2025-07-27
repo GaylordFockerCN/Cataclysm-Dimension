@@ -33,7 +33,7 @@ public class CDNoiseSettings {
         context.register(PLAIN, plainNoise(densityFunctions, noise));
         context.register(SEA, overworldWithSeaLevel(context, false, false, 128));
 //        context.register(DEEP_SEA, sunkenCity(densityFunctions, noise));
-        context.register(DESERT, plainDesert(densityFunctions, noise));
+//        context.register(DESERT, plainDesert(densityFunctions, noise));
         context.register(ARENA, arena(densityFunctions, noise));
         context.register(SOUL, arena(densityFunctions, noise));
         context.register(AIR, new NoiseGeneratorSettings(new NoiseSettings(0, 128, 2, 1),
