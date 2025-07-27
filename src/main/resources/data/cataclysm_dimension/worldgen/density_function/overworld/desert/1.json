@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:mul",
+  "argument1": {
+    "type": "minecraft:noise",
+    "noise": "cataclysm_dimension:desert/1",
+    "xz_scale": 0.25,
+    "y_scale": 0
+  },
+  "argument2": 1
+}
