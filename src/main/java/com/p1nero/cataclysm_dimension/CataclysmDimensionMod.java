@@ -113,11 +113,19 @@ public class CataclysmDimensionMod {
     private void onDatapackLoad(AddPackFindersEvent event) {
         if (event.getPackType() == PackType.SERVER_DATA) {
             String name = CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "keep_original" : "not_keep_original";
-            var resourcePath = ModList.get().getModFileById(MOD_ID).getFile().findResource("packs/" + name);
-            var pack = Pack.readMetaAndCreate(name, Component.literal(name), false,
-                    (path) -> new PathPackResources(path, resourcePath, false), PackType.SERVER_DATA, Pack.Position.TOP, PackSource.WORLD);
-            event.addRepositorySource((packConsumer) -> packConsumer.accept(pack));
+            addNewDatapack(event, name);
+            if(CataclysmDimensionModConfig.RANDOM_SPREAD_IN_DIMENSION) {
+                addNewDatapack(event, "random_spread");
+            }
         }
+    }
+
+    private void addNewDatapack(AddPackFindersEvent event, String name) {
+        var resourcePath = ModList.get().getModFileById(MOD_ID).getFile().findResource("packs/" + name);
+        var pack = Pack.readMetaAndCreate(name, Component.literal(name), false,
+                (path) -> new PathPackResources(path, resourcePath, false), PackType.SERVER_DATA, Pack.Position.TOP, PackSource.WORLD);
+        event.addRepositorySource((packConsumer) -> packConsumer.accept(pack));
+
     }
 
 }

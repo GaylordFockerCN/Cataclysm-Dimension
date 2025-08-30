@@ -14,6 +14,7 @@ import java.io.IOException;
 public class CataclysmDimensionModConfig {
     public static boolean ENABLE_TELEPORT_EYE = true;
     public static boolean KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS = false;
+    public static boolean RANDOM_SPREAD_IN_DIMENSION = false;
     public static final String JSON = CataclysmDimensionMod.MOD_ID + ".json";
 
     public static final Logger LOGGER = LoggerFactory.getLogger("better_structure_block");
@@ -32,6 +33,7 @@ public class CataclysmDimensionModConfig {
                 LOGGER.info("Loading configuration file...");
                 JsonObject config = new Gson().fromJson(reader, JsonObject.class);
                 ENABLE_TELEPORT_EYE = config.get("enable_teleport_eye").getAsBoolean();
+                RANDOM_SPREAD_IN_DIMENSION = config.get("random_spread_in_dimension").getAsBoolean();
                 KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS = config.get("keep_structures_in_original_dimensions").getAsBoolean();
             } catch (IOException e) {
                 LOGGER.error("Failed to load configuration file!{}", String.valueOf(e));
@@ -41,6 +43,7 @@ public class CataclysmDimensionModConfig {
                 LOGGER.info("Generating configuration file...");
                 if(configFile.createNewFile()){
                     JsonObject config = new JsonObject();
+                    config.addProperty("random_spread_in_dimension", RANDOM_SPREAD_IN_DIMENSION);
                     config.addProperty("enable_teleport_eye", ENABLE_TELEPORT_EYE);
                     config.addProperty("keep_structures_in_original_dimensions", KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS);
                     try (FileWriter writer = new FileWriter(configFile)) {
