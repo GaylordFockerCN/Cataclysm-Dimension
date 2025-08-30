@@ -1,0 +1,11 @@
+{
+  "structures": [
+    {
+      "structure": "cataclysm_dimension:ancient_factory",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "cataclysm_dimension:spawn_pos_placement"
+  }
+}

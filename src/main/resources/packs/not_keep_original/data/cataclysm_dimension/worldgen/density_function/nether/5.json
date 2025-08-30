@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:cache_once",
+  "argument": {
+    "type": "minecraft:max",
+    "argument1": "cataclysm_dimension:nether/3",
+    "argument2": {
+      "type": "minecraft:max",
+      "argument1": "cataclysm_dimension:nether/2",
+      "argument2": {
+        "type": "minecraft:add",
+        "argument1": "cataclysm_dimension:nether/4",
+        "argument2": -1.2
+      }
+    }
+  }
+}

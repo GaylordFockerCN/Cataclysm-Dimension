@@ -13,18 +13,22 @@ import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.PathPackResources;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.List;
@@ -37,12 +41,13 @@ public class CataclysmDimensionMod {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         MinecraftForge.EVENT_BUS.addListener(this::onItemUse);
         MinecraftForge.EVENT_BUS.addListener(this::onToolTip);
+        CataclysmDimensionModConfig.loadConfig();
+        bus.addListener(this::onDatapackLoad);
         CDPlacementTypes.STRUCTURE_PLACEMENT_TYPES.register(bus);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CDConfig.SPEC);
     }
 
     private void onItemUse(LivingEntityUseItemEvent event){
-        if(!CDConfig.ENABLE_TELEPORT_EYE.get()) {
+        if(!CataclysmDimensionModConfig.ENABLE_TELEPORT_EYE) {
             return;
         }
         LivingEntity entity = event.getEntity();
@@ -97,11 +102,21 @@ public class CataclysmDimensionMod {
     }
 
     private void onToolTip(ItemTooltipEvent event) {
-        if(!CDConfig.ENABLE_TELEPORT_EYE.get()) {
+        if(!CataclysmDimensionModConfig.ENABLE_TELEPORT_EYE) {
             return;
         }
         if(List.of(ModItems.ABYSS_EYE.get(), ModItems.STORM_EYE.get(), ModItems.CURSED_EYE.get(), ModItems.MECH_EYE.get(), ModItems.FLAME_EYE.get(), ModItems.DESERT_EYE.get(), ModItems.MONSTROUS_EYE.get(), ModItems.VOID_EYE.get()).contains(event.getItemStack().getItem())) {
             event.getToolTip().add(Component.translatable("tip.cataclysm_dimension.enter").withStyle(ChatFormatting.GRAY));
+        }
+    }
+
+    private void onDatapackLoad(AddPackFindersEvent event) {
+        if (event.getPackType() == PackType.SERVER_DATA) {
+            String name = CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "keep_original" : "not_keep_original";
+            var resourcePath = ModList.get().getModFileById(MOD_ID).getFile().findResource("packs/" + name);
+            var pack = Pack.readMetaAndCreate(name, Component.literal(name), false,
+                    (path) -> new PathPackResources(path, resourcePath, false), PackType.SERVER_DATA, Pack.Position.TOP, PackSource.WORLD);
+            event.addRepositorySource((packConsumer) -> packConsumer.accept(pack));
         }
     }
 

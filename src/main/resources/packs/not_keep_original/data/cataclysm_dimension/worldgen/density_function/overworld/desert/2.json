@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:mul",
+  "argument1": {
+    "type": "minecraft:abs",
+    "argument": {
+      "type": "minecraft:shifted_noise",
+      "noise": "cataclysm_dimension:desert/2",
+      "xz_scale": 0.35,
+      "y_scale": 0,
+      "shift_x": "minecraft:shift_x",
+      "shift_y": 0,
+      "shift_z": "minecraft:shift_z"
+    }
+  },
+  "argument2": -1.2
+}

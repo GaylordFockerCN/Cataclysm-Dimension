@@ -1,0 +1,11 @@
+{
+  "type": "cataclysm_dimension:cataclysm_pharaohs_bane_type",
+  "generator": {
+    "type": "minecraft:noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "cataclysm_dimension:desert"
+    },
+    "settings": "cataclysm_dimension:no_sea"
+  }
+}
