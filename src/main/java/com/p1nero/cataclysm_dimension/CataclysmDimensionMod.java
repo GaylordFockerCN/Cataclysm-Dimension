@@ -112,10 +112,9 @@ public class CataclysmDimensionMod {
 
     private void onDatapackLoad(AddPackFindersEvent event) {
         if (event.getPackType() == PackType.SERVER_DATA) {
-            String name = CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "keep_original" : "not_keep_original";
-            addNewDatapack(event, name);
+            addNewDatapack(event, CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "keep_original" : "not_keep_original");
             if(CataclysmDimensionModConfig.RANDOM_SPREAD_IN_DIMENSION) {
-                addNewDatapack(event, "random_spread");
+                addNewDatapack(event, CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "random_spread_dim" : "random_spread");
             }
         }
     }
