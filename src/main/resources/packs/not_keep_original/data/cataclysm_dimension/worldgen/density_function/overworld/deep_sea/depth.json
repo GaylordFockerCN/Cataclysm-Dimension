@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:add",
+  "argument1": {
+    "type": "minecraft:y_clamped_gradient",
+    "from_value": 1.5,
+    "from_y": -32,
+    "to_value": -1.5,
+    "to_y": 60
+  },
+  "argument2": {
+    "type": "minecraft:mul",
+    "argument1": "cataclysm_dimension:overworld/deep_sea/1",
+    "argument2": 1
+  }
+}

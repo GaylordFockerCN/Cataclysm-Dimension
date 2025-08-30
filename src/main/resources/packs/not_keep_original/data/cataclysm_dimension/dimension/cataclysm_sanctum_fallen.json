@@ -1,0 +1,11 @@
+{
+  "type": "cataclysm_dimension:cataclysm_sanctum_fallen_type",
+  "generator": {
+    "type": "minecraft:noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "cataclysm_dimension:warm_ocean"
+    },
+    "settings": "cataclysm_dimension:sea"
+  }
+}

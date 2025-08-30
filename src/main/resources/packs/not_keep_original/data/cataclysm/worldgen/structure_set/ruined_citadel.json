@@ -1,0 +1,11 @@
+{
+  "structures": [
+    {
+      "structure": "cataclysm:ruined_citadel",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "cataclysm_dimension:spawn_pos_placement"
+  }
+}

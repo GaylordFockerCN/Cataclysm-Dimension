@@ -1,0 +1,11 @@
+{
+  "type": "cataclysm_dimension:cataclysm_eternal_frosthold_type",
+  "generator": {
+    "type": "minecraft:noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "cataclysm_dimension:snowy_plains"
+    },
+    "settings": "cataclysm_dimension:plain_noise_gen"
+  }
+}

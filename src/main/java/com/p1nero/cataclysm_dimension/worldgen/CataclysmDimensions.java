@@ -167,7 +167,7 @@ public class CataclysmDimensions {
                 true,                       // 床安全
                 false,                      // 重生锚无效
                 -64,                       // 最低Y层
-                384,                       // 总高度
+                512,                       // 总高度
                 192,                       // 中等逻辑高度
                 BlockTags.INFINIBURN_OVERWORLD,
                 BuiltinDimensionTypes.OVERWORLD_EFFECTS,

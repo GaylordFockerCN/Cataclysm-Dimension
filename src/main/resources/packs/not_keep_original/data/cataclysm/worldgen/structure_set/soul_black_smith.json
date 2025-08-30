@@ -1,0 +1,11 @@
+{
+  "structures": [
+    {
+      "structure": "cataclysm:soul_black_smith",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "cataclysm_dimension:spawn_pos_placement"
+  }
+}

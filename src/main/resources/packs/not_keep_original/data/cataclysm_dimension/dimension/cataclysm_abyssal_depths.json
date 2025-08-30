@@ -1,0 +1,11 @@
+{
+  "type": "cataclysm_dimension:cataclysm_abyssal_depths_type",
+  "generator": {
+    "type": "minecraft:noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "cataclysm_dimension:deep_ocean"
+    },
+    "settings": "cataclysm_dimension:deep_sea"
+  }
+}
