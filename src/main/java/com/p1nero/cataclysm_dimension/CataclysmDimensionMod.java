@@ -1,6 +1,7 @@
 package com.p1nero.cataclysm_dimension;
 
 import com.github.L_Ender.cataclysm.init.ModItems;
+import com.mojang.logging.LogUtils;
 import com.p1nero.cataclysm_dimension.worldgen.CataclysmDimensions;
 import com.p1nero.cataclysm_dimension.worldgen.placements.CDPlacementTypes;
 import com.p1nero.cataclysm_dimension.worldgen.portal.CDNetherTeleporter;
@@ -10,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,91 +23,164 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.storage.IOWorker;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.AddPackFindersEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Mod(CataclysmDimensionMod.MOD_ID)
 public class CataclysmDimensionMod {
     public static final String MOD_ID = "cataclysm_dimension";
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public CataclysmDimensionMod() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         MinecraftForge.EVENT_BUS.addListener(this::onItemUse);
         MinecraftForge.EVENT_BUS.addListener(this::onToolTip);
+        MinecraftForge.EVENT_BUS.addListener(this::onServerLevelTick);
         CataclysmDimensionModConfig.loadConfig();
         bus.addListener(this::onDatapackLoad);
         CDPlacementTypes.STRUCTURE_PLACEMENT_TYPES.register(bus);
     }
 
-    private void onItemUse(LivingEntityUseItemEvent event){
-        if(!CataclysmDimensionModConfig.ENABLE_TELEPORT_EYE) {
+    public record DimensionTeleportInfo(ResourceKey<Level> dimensionKey, ITeleporter teleporter) {}
+
+    public static Map<Item, DimensionTeleportInfo> TELEPORT_MAP;
+
+    private void initMap() {
+        TELEPORT_MAP = Map.of(
+                ModItems.ABYSS_EYE.get(), new DimensionTeleportInfo(
+                        CataclysmDimensions.CATACLYSM_ABYSSAL_DEPTHS_LEVEL_KEY,
+                        new CDTeleporter(new BlockPos(0, 200, 0))
+                ),
+                ModItems.MECH_EYE.get(), new DimensionTeleportInfo(
+                        CataclysmDimensions.CATACLYSM_FORGE_OF_AEONS_LEVEL_KEY,
+                        new CDTeleporter(new BlockPos(0, 150, 0))
+                ),
+                ModItems.FLAME_EYE.get(), new DimensionTeleportInfo(
+                        CataclysmDimensions.CATACLYSM_INFERNOS_MAW_LEVEL_KEY,
+                        new CDNetherTeleporter(new BlockPos(0, 64, 0))
+                ),
+                ModItems.VOID_EYE.get(), new DimensionTeleportInfo(
+                        CataclysmDimensions.CATACLYSM_BASTION_LOST_LEVEL_KEY,
+                        new CDTeleporter(new BlockPos(0, 150, 0))
+                ),
+                ModItems.MONSTROUS_EYE.get(), new DimensionTeleportInfo(
+                        CataclysmDimensions.CATACLYSM_SOULS_ANVIL_LEVEL_KEY,
+                        new CDNetherTeleporter(new BlockPos(0, 64, 0))
+                ),
+                ModItems.DESERT_EYE.get(), new DimensionTeleportInfo(
+                        CataclysmDimensions.CATACLYSM_PHARAOHS_BANE_LEVEL_KEY,
+                        new CDTeleporter(new BlockPos(0, 200, 0), 400)
+                ),
+                ModItems.CURSED_EYE.get(), new DimensionTeleportInfo(
+                        CataclysmDimensions.CATACLYSM_ETERNAL_FROSTHOLD_LEVEL_KEY,
+                        new CDTeleporter(new BlockPos(0, 200, 0), 400)
+                ),
+                ModItems.STORM_EYE.get(), new DimensionTeleportInfo(
+                        CataclysmDimensions.CATACLYSM_SANCTUM_FALLEN_LEVEL_KEY,
+                        new CDTeleporter(new BlockPos(0, 200, 0))
+                )
+        );
+    }
+
+    private void onItemUse(LivingEntityUseItemEvent event) {
+        if (!CataclysmDimensionModConfig.ENABLE_TELEPORT_EYE) {
             return;
         }
         LivingEntity entity = event.getEntity();
-        if(entity.level().isClientSide) {
+        if (entity.level().isClientSide) {
             return;
         }
-        if(entity.isShiftKeyDown()) {
+        if (entity.isShiftKeyDown()) {
             ItemStack itemStack = event.getItem();
             MinecraftServer minecraftServer = entity.level().getServer();
-            if(minecraftServer == null) {
+            if (minecraftServer == null) {
                 return;
             }
-            if(entity instanceof Player player && player.getCooldowns().isOnCooldown(itemStack.getItem())) {
+            if (entity instanceof Player player && player.getCooldowns().isOnCooldown(itemStack.getItem())) {
                 return;
             }
-            boolean flag = true;
-            if(itemStack.is(ModItems.ABYSS_EYE.get())) {
-                ServerLevel level = minecraftServer.getLevel(CataclysmDimensions.CATACLYSM_ABYSSAL_DEPTHS_LEVEL_KEY);
-                entity.changeDimension(level, new CDTeleporter(new BlockPos(0, 200, 0)));
-            } else if(itemStack.is(ModItems.MECH_EYE.get())) {
-                ServerLevel level = minecraftServer.getLevel(CataclysmDimensions.CATACLYSM_FORGE_OF_AEONS_LEVEL_KEY);
-                entity.changeDimension(level, new CDTeleporter(new BlockPos(0, 150, 0)));
-            } else if(itemStack.is(ModItems.FLAME_EYE.get())) {
-                ServerLevel level = minecraftServer.getLevel(CataclysmDimensions.CATACLYSM_INFERNOS_MAW_LEVEL_KEY);
-                entity.changeDimension(level, new CDNetherTeleporter(new BlockPos(0, 64, 0)));
-            } else if(itemStack.is(ModItems.VOID_EYE.get())) {
-                ServerLevel level = minecraftServer.getLevel(CataclysmDimensions.CATACLYSM_BASTION_LOST_LEVEL_KEY);
-                entity.changeDimension(level, new CDTeleporter(new BlockPos(0, 150, 0)));
-            } else if(itemStack.is(ModItems.MONSTROUS_EYE.get())) {
-                ServerLevel level = minecraftServer.getLevel(CataclysmDimensions.CATACLYSM_SOULS_ANVIL_LEVEL_KEY);
-                entity.changeDimension(level, new CDNetherTeleporter(new BlockPos(0, 64, 0)));
-            } else if(itemStack.is(ModItems.DESERT_EYE.get())) {
-                ServerLevel level = minecraftServer.getLevel(CataclysmDimensions.CATACLYSM_PHARAOHS_BANE_LEVEL_KEY);
-                entity.changeDimension(level, new CDTeleporter(new BlockPos(0, 200, 0), 400));
-            } else if(itemStack.is(ModItems.CURSED_EYE.get())) {
-                ServerLevel level = minecraftServer.getLevel(CataclysmDimensions.CATACLYSM_ETERNAL_FROSTHOLD_LEVEL_KEY);
-                entity.changeDimension(level, new CDTeleporter(new BlockPos(0, 200, 0), 400));
-            } else if(itemStack.is(ModItems.STORM_EYE.get())) {
-                ServerLevel level = minecraftServer.getLevel(CataclysmDimensions.CATACLYSM_SANCTUM_FALLEN_LEVEL_KEY);
-                entity.changeDimension(level, new CDTeleporter(new BlockPos(0, 200, 0)));
-            } else {
-                flag = false;
+            if(TELEPORT_MAP == null) {
+                initMap();
             }
-            if(flag) {
-                if(entity instanceof ServerPlayer player) {
-                    player.getCooldowns().addCooldown(itemStack.getItem(), 600);
-                    player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.PORTAL_TRAVEL), SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0F, 1.0F, player.getRandom().nextInt()));
+            DimensionTeleportInfo info = TELEPORT_MAP.get(itemStack.getItem());
+            if (info != null) {
+                ServerLevel level = minecraftServer.getLevel(info.dimensionKey());
+                if (level != null) {
+                    entity.changeDimension(level, info.teleporter());
+                    if (entity instanceof ServerPlayer player) {
+                        player.getCooldowns().addCooldown(itemStack.getItem(), 600);
+                        player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.PORTAL_TRAVEL), SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0F, 1.0F, player.getRandom().nextInt()));
+                    }
+                }
+            }
+        }
+    }
 
+    /**
+     * 记录是否删过了
+     */
+    public static final Map<ResourceKey<Level>, Boolean> RESOURCE_KEY_BOOLEAN_MAP = new HashMap<>();
+
+    /**
+     * 没人就重置维度
+     */
+    private void onServerLevelTick(TickEvent.LevelTickEvent event) {
+        if (event.level instanceof ServerLevel serverLevel) {
+            if(!serverLevel.players().isEmpty()) {
+                RESOURCE_KEY_BOOLEAN_MAP.put(serverLevel.dimension(), false);
+            }
+            if(serverLevel.players().isEmpty() && CataclysmDimensionModConfig.RESET_DIMENSION_IF_NO_PLAYER && !RESOURCE_KEY_BOOLEAN_MAP.getOrDefault(serverLevel.dimension(), false)) {
+                if (CataclysmDimensions.LEVELS.contains(serverLevel.dimension())) {
+                    try {
+                        serverLevel.noSave = false;
+                        serverLevel.save(null, true, true);
+                        IOWorker ioWorker = ((IOWorker) serverLevel.getChunkSource().chunkScanner());
+                        ioWorker.storage.regionCache.clear();
+                        Files.walkFileTree(ioWorker.storage.folder, new SimpleFileVisitor<>(){
+                            @Override
+                            public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) throws IOException {
+                                Files.deleteIfExists(file);
+                                return FileVisitResult.CONTINUE;
+                            }
+                        });
+                        RESOURCE_KEY_BOOLEAN_MAP.put(serverLevel.dimension(), true);
+                    } catch (Exception e) {
+                        LOGGER.error("Failed to reset dimension {}.", serverLevel.dimension(), e);
+                    }
                 }
             }
         }
     }
 
     private void onToolTip(ItemTooltipEvent event) {
-        if(!CataclysmDimensionModConfig.ENABLE_TELEPORT_EYE) {
+        if (!CataclysmDimensionModConfig.ENABLE_TELEPORT_EYE) {
             return;
         }
-        if(List.of(ModItems.ABYSS_EYE.get(), ModItems.STORM_EYE.get(), ModItems.CURSED_EYE.get(), ModItems.MECH_EYE.get(), ModItems.FLAME_EYE.get(), ModItems.DESERT_EYE.get(), ModItems.MONSTROUS_EYE.get(), ModItems.VOID_EYE.get()).contains(event.getItemStack().getItem())) {
+        if (List.of(ModItems.ABYSS_EYE.get(), ModItems.STORM_EYE.get(), ModItems.CURSED_EYE.get(), ModItems.MECH_EYE.get(), ModItems.FLAME_EYE.get(), ModItems.DESERT_EYE.get(), ModItems.MONSTROUS_EYE.get(), ModItems.VOID_EYE.get()).contains(event.getItemStack().getItem())) {
             event.getToolTip().add(Component.translatable("tip.cataclysm_dimension.enter").withStyle(ChatFormatting.GRAY));
         }
     }
@@ -113,7 +188,7 @@ public class CataclysmDimensionMod {
     private void onDatapackLoad(AddPackFindersEvent event) {
         if (event.getPackType() == PackType.SERVER_DATA) {
             addNewDatapack(event, CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "keep_original" : "not_keep_original");
-            if(CataclysmDimensionModConfig.RANDOM_SPREAD_IN_DIMENSION) {
+            if (CataclysmDimensionModConfig.RANDOM_SPREAD_IN_DIMENSION) {
                 addNewDatapack(event, CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "random_spread_dim" : "random_spread");
             }
         }
@@ -121,10 +196,9 @@ public class CataclysmDimensionMod {
 
     private void addNewDatapack(AddPackFindersEvent event, String name) {
         var resourcePath = ModList.get().getModFileById(MOD_ID).getFile().findResource("packs/" + name);
-        var pack = Pack.readMetaAndCreate(name, Component.literal(name), false,
+        var pack = Pack.readMetaAndCreate(name, Component.literal(name), true,
                 (path) -> new PathPackResources(path, resourcePath, false), PackType.SERVER_DATA, Pack.Position.TOP, PackSource.WORLD);
         event.addRepositorySource((packConsumer) -> packConsumer.accept(pack));
-
     }
 
 }

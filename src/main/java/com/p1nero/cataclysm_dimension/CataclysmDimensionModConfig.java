@@ -10,51 +10,118 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Map;
 
 public class CataclysmDimensionModConfig {
+    // 配置项默认值
     public static boolean ENABLE_TELEPORT_EYE = true;
     public static boolean KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS = false;
     public static boolean RANDOM_SPREAD_IN_DIMENSION = false;
-    public static final String JSON = CataclysmDimensionMod.MOD_ID + ".json";
+    public static boolean RESET_DIMENSION_IF_NO_PLAYER = false;
 
-    public static final Logger LOGGER = LoggerFactory.getLogger("better_structure_block");
+    // 配置键名常量
+    private static final String ENABLE_TELEPORT_EYE_KEY = "enable_teleport_eye";
+    private static final String KEEP_STRUCTURES_KEY = "keep_structures_in_original_dimensions";
+    private static final String RANDOM_SPREAD_KEY = "random_spread_in_dimension";
+    private static final String RESET_DIMENSION_KEY = "reset_dimension_if_no_player";
+
+    public static final String JSON = CataclysmDimensionMod.MOD_ID + ".json";
+    public static final Logger LOGGER = LoggerFactory.getLogger("cataclysm_dimension_config");
+
+    // 默认配置映射
+    private static final Map<String, Object> DEFAULT_CONFIG = Map.of(
+            ENABLE_TELEPORT_EYE_KEY, ENABLE_TELEPORT_EYE,
+            KEEP_STRUCTURES_KEY, KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS,
+            RANDOM_SPREAD_KEY, RANDOM_SPREAD_IN_DIMENSION,
+            RESET_DIMENSION_KEY, RESET_DIMENSION_IF_NO_PLAYER
+    );
+
     public static void loadConfig() {
-        File configFolder = new File("config" + File.separator + CataclysmDimensionMod.MOD_ID);
-        if (!configFolder.exists()) {
-            if(!configFolder.mkdirs()){
-                LOGGER.info("Failed to create config folder.");
-                return;
-            }
+        File configFolder = new File("config", CataclysmDimensionMod.MOD_ID);
+        File configFile = new File(configFolder, JSON);
+
+        // 确保配置目录存在
+        if (!configFolder.exists() && !configFolder.mkdirs()) {
+            LOGGER.error("Failed to create config folder: {}", configFolder.getAbsolutePath());
+            return;
         }
 
-        File configFile = new File(configFolder, JSON);
-        if (configFile.exists()) {
-            try (FileReader reader = new FileReader(configFile)) {
-                LOGGER.info("Loading configuration file...");
-                JsonObject config = new Gson().fromJson(reader, JsonObject.class);
-                ENABLE_TELEPORT_EYE = config.get("enable_teleport_eye").getAsBoolean();
-                RANDOM_SPREAD_IN_DIMENSION = config.get("random_spread_in_dimension").getAsBoolean();
-                KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS = config.get("keep_structures_in_original_dimensions").getAsBoolean();
-            } catch (IOException e) {
-                LOGGER.error("Failed to load configuration file!{}", String.valueOf(e));
-            }
-        } else {
-            try {
-                LOGGER.info("Generating configuration file...");
-                if(configFile.createNewFile()){
-                    JsonObject config = new JsonObject();
-                    config.addProperty("random_spread_in_dimension", RANDOM_SPREAD_IN_DIMENSION);
-                    config.addProperty("enable_teleport_eye", ENABLE_TELEPORT_EYE);
-                    config.addProperty("keep_structures_in_original_dimensions", KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS);
-                    try (FileWriter writer = new FileWriter(configFile)) {
-                        writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(config));
+        // 如果配置文件不存在，创建默认配置
+        if (!configFile.exists()) {
+            generateConfig(configFile);
+            return;
+        }
+
+        // 加载现有配置
+        try (FileReader reader = new FileReader(configFile)) {
+            JsonObject config = new Gson().fromJson(reader, JsonObject.class);
+            boolean needsUpdate = false;
+
+            // 检查并添加缺失的配置项
+            for (Map.Entry<String, Object> entry : DEFAULT_CONFIG.entrySet()) {
+                String key = entry.getKey();
+                if (!config.has(key)) {
+                    LOGGER.info("Adding missing config key: {}", key);
+                    if (entry.getValue() instanceof Boolean) {
+                        config.addProperty(key, (Boolean) entry.getValue());
                     }
-                } else {
-                    LOGGER.info("Error generating configuration file!");
+                    needsUpdate = true;
                 }
-            } catch (IOException e) {
-                LOGGER.info("Error generating configuration file!{}", String.valueOf(e));
             }
+
+            // 如果有缺失的配置项，更新配置文件
+            if (needsUpdate) {
+                try (FileWriter writer = new FileWriter(configFile)) {
+                    writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(config));
+                }
+            }
+
+            // 读取配置值
+            ENABLE_TELEPORT_EYE = config.get(ENABLE_TELEPORT_EYE_KEY).getAsBoolean();
+            RANDOM_SPREAD_IN_DIMENSION = config.get(RANDOM_SPREAD_KEY).getAsBoolean();
+            KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS = config.get(KEEP_STRUCTURES_KEY).getAsBoolean();
+            RESET_DIMENSION_IF_NO_PLAYER = config.get(RESET_DIMENSION_KEY).getAsBoolean();
+
+        } catch (IOException e) {
+            LOGGER.error("Failed to load configuration file: {}", e.getMessage());
+            // 加载失败时使用默认值
+            useDefaultValues();
+        } catch (Exception e) {
+            LOGGER.error("Error parsing configuration file: {}", e.getMessage());
+            // 解析错误时重新生成配置文件
+            generateConfig(configFile);
+            useDefaultValues();
         }
     }
+
+    private static void generateConfig(File configFile) {
+        try {
+            if (configFile.createNewFile()) {
+                LOGGER.info("Generating configuration file: {}", configFile.getAbsolutePath());
+
+                JsonObject config = new JsonObject();
+                for (Map.Entry<String, Object> entry : DEFAULT_CONFIG.entrySet()) {
+                    if (entry.getValue() instanceof Boolean) {
+                        config.addProperty(entry.getKey(), (Boolean) entry.getValue());
+                    }
+                }
+
+                try (FileWriter writer = new FileWriter(configFile)) {
+                    writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(config));
+                }
+            } else {
+                LOGGER.error("Failed to create configuration file: {}", configFile.getAbsolutePath());
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error generating configuration file: {}", e.getMessage());
+        }
+    }
+
+    private static void useDefaultValues() {
+        ENABLE_TELEPORT_EYE = (Boolean) DEFAULT_CONFIG.get(ENABLE_TELEPORT_EYE_KEY);
+        RANDOM_SPREAD_IN_DIMENSION = (Boolean) DEFAULT_CONFIG.get(RANDOM_SPREAD_KEY);
+        KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS = (Boolean) DEFAULT_CONFIG.get(KEEP_STRUCTURES_KEY);
+        RESET_DIMENSION_IF_NO_PLAYER = (Boolean) DEFAULT_CONFIG.get(RESET_DIMENSION_KEY);
+    }
+
 }

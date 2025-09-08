@@ -16,6 +16,8 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.OptionalLong;
 
 public class CataclysmDimensions {
@@ -83,6 +85,15 @@ public class CataclysmDimensions {
     public static final ResourceKey<DimensionType> CATACLYSM_BASTION_LOST_DIM_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,
             new ResourceLocation(CataclysmDimensionMod.MOD_ID, "cataclysm_bastion_lost_type"));
 
+    public static final List<ResourceKey<Level>> LEVELS = List.of(
+            CATACLYSM_BASTION_LOST_LEVEL_KEY,
+            CATACLYSM_ABYSSAL_DEPTHS_LEVEL_KEY,
+            CATACLYSM_ETERNAL_FROSTHOLD_LEVEL_KEY,
+            CATACLYSM_INFERNOS_MAW_LEVEL_KEY,
+            CATACLYSM_SANCTUM_FALLEN_LEVEL_KEY,
+            CATACLYSM_PHARAOHS_BANE_LEVEL_KEY,
+            CATACLYSM_SOULS_ANVIL_LEVEL_KEY,
+            CATACLYSM_FORGE_OF_AEONS_LEVEL_KEY);
     public static void bootstrapType(BootstapContext<DimensionType> context) {
         // 远古工厂 - 恶地维度 (类似主世界)
         context.register(CATACLYSM_FORGE_OF_AEONS_DIM_TYPE, new DimensionType(
