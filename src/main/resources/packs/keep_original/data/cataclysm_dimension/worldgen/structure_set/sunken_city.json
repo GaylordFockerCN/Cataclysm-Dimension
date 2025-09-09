@@ -1,7 +1,7 @@
 {
   "structures": [
     {
-      "structure": "cataclysm:sunken_city",
+      "structure": "cataclysm_dimension:sunken_city",
       "weight": 1
     }
   ],
