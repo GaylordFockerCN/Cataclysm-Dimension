@@ -1,5 +1,6 @@
 package com.p1nero.cataclysm_dimension.worldgen.portal;
 
+import com.p1nero.cataclysm_dimension.CataclysmDimensionModConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,7 +48,7 @@ public class CDTeleporter implements ITeleporter {
         while (!destinationLevel.getBlockState(this.pos).is(Blocks.AIR)){
             this.pos = this.pos.above();
         }
-        if(entity instanceof ServerPlayer player){
+        if(CataclysmDimensionModConfig.SLOW_FALL_WHEN_ENTER_DIMENSIONS && entity instanceof ServerPlayer player){
             player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, slowFallTick, 1, false, true));
         }
         pos = new PortalInfo(this.pos.getCenter(), Vec3.ZERO, entity.getYRot(), entity.getXRot());
