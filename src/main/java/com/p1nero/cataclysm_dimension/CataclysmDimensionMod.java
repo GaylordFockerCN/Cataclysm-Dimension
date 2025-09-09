@@ -12,6 +12,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -141,41 +142,49 @@ public class CataclysmDimensionMod {
     }
 
     /**
-     * 记录是否删过了
+     * 记录是否删过了，用ResourceLocation是因为输出比较直观
      */
-    public static final Map<ResourceKey<Level>, Boolean> RESOURCE_KEY_BOOLEAN_MAP = new HashMap<>();
+    public static final Map<ResourceLocation, Boolean> RESOURCE_KEY_BOOLEAN_MAP = new HashMap<>();
 
     /**
      * 没人就重置维度
      */
     private void onServerLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.level instanceof ServerLevel serverLevel) {
+        if(event.phase == TickEvent.Phase.END) {
+            return;
+        }
+        if (event.level instanceof ServerLevel serverLevel && CataclysmDimensions.LEVELS.contains(serverLevel.dimension())) {
+            ResourceLocation resourceLocation = serverLevel.dimension().location();
             if(!serverLevel.players().isEmpty()) {
-                RESOURCE_KEY_BOOLEAN_MAP.put(serverLevel.dimension(), false);
+                RESOURCE_KEY_BOOLEAN_MAP.put(resourceLocation, false);
             }
-            if(serverLevel.players().isEmpty() && CataclysmDimensionModConfig.RESET_DIMENSION_IF_NO_PLAYER && !RESOURCE_KEY_BOOLEAN_MAP.getOrDefault(serverLevel.dimension(), false)) {
-                if (CataclysmDimensions.LEVELS.contains(serverLevel.dimension())) {
-                    try {
+            if(serverLevel.players().isEmpty() && CataclysmDimensionModConfig.RESET_DIMENSION_IF_NO_PLAYER && !RESOURCE_KEY_BOOLEAN_MAP.getOrDefault(resourceLocation, false)) {
+                try {
+                    LOGGER.info("[Cataclysm Dimension]: No player inside. trying to reset dimension {}.", resourceLocation);
+                    IOWorker ioWorker = ((IOWorker) serverLevel.getChunkSource().chunkScanner());
+                    if(Files.exists(ioWorker.storage.folder)) {
                         serverLevel.noSave = false;
                         serverLevel.save(null, true, true);
-                        IOWorker ioWorker = ((IOWorker) serverLevel.getChunkSource().chunkScanner());
                         ioWorker.storage.regionCache.clear();
                         Files.walkFileTree(ioWorker.storage.folder, new SimpleFileVisitor<>(){
                             @Override
                             public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) throws IOException {
-                                Files.deleteIfExists(file);
+                                if(Files.deleteIfExists(file)){
+                                    LOGGER.info("[Cataclysm Dimension]: {} region cache Deleted.", resourceLocation);
+                                }
                                 return FileVisitResult.CONTINUE;
                             }
                         });
-                        RESOURCE_KEY_BOOLEAN_MAP.put(serverLevel.dimension(), true);
-                    } catch (Exception e) {
-                        LOGGER.error("Failed to reset dimension {}.", serverLevel.dimension(), e);
+                    } else {
+                        LOGGER.info("[Cataclysm Dimension]: No region files in {}. Skipped.", resourceLocation);
                     }
+                    RESOURCE_KEY_BOOLEAN_MAP.put(resourceLocation, true);
+                } catch (Exception e) {
+                    LOGGER.error("[Cataclysm Dimension]: Failed to reset dimension {}.", resourceLocation, e);
                 }
             }
         }
     }
-
     private void onToolTip(ItemTooltipEvent event) {
         if (!CataclysmDimensionModConfig.ENABLE_TELEPORT_EYE) {
             return;

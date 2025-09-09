@@ -1,7 +1,7 @@
 {
   "structures": [
     {
-      "structure": "cataclysm:cursed_pyramid",
+      "structure": "cataclysm_dimension:cursed_pyramid",
       "weight": 1
     }
   ],

@@ -18,12 +18,14 @@ public class CataclysmDimensionModConfig {
     public static boolean KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS = false;
     public static boolean RANDOM_SPREAD_IN_DIMENSION = false;
     public static boolean RESET_DIMENSION_IF_NO_PLAYER = false;
+    public static boolean SLOW_FALL_WHEN_ENTER_DIMENSIONS = true;
 
     // 配置键名常量
     private static final String ENABLE_TELEPORT_EYE_KEY = "enable_teleport_eye";
     private static final String KEEP_STRUCTURES_KEY = "keep_structures_in_original_dimensions";
     private static final String RANDOM_SPREAD_KEY = "random_spread_in_dimension";
     private static final String RESET_DIMENSION_KEY = "reset_dimension_if_no_player";
+    private static final String SLOW_FALL_WHEN_ENTER_DIMENSIONS_KEY = "slow_fall_when_enter_dimensions";
 
     public static final String JSON = CataclysmDimensionMod.MOD_ID + ".json";
     public static final Logger LOGGER = LoggerFactory.getLogger("cataclysm_dimension_config");
@@ -33,7 +35,8 @@ public class CataclysmDimensionModConfig {
             ENABLE_TELEPORT_EYE_KEY, ENABLE_TELEPORT_EYE,
             KEEP_STRUCTURES_KEY, KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS,
             RANDOM_SPREAD_KEY, RANDOM_SPREAD_IN_DIMENSION,
-            RESET_DIMENSION_KEY, RESET_DIMENSION_IF_NO_PLAYER
+            RESET_DIMENSION_KEY, RESET_DIMENSION_IF_NO_PLAYER,
+            SLOW_FALL_WHEN_ENTER_DIMENSIONS_KEY, SLOW_FALL_WHEN_ENTER_DIMENSIONS
     );
 
     public static void loadConfig() {
@@ -81,6 +84,7 @@ public class CataclysmDimensionModConfig {
             RANDOM_SPREAD_IN_DIMENSION = config.get(RANDOM_SPREAD_KEY).getAsBoolean();
             KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS = config.get(KEEP_STRUCTURES_KEY).getAsBoolean();
             RESET_DIMENSION_IF_NO_PLAYER = config.get(RESET_DIMENSION_KEY).getAsBoolean();
+            SLOW_FALL_WHEN_ENTER_DIMENSIONS = config.get(SLOW_FALL_WHEN_ENTER_DIMENSIONS_KEY).getAsBoolean();
 
         } catch (IOException e) {
             LOGGER.error("Failed to load configuration file: {}", e.getMessage());
@@ -122,6 +126,7 @@ public class CataclysmDimensionModConfig {
         RANDOM_SPREAD_IN_DIMENSION = (Boolean) DEFAULT_CONFIG.get(RANDOM_SPREAD_KEY);
         KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS = (Boolean) DEFAULT_CONFIG.get(KEEP_STRUCTURES_KEY);
         RESET_DIMENSION_IF_NO_PLAYER = (Boolean) DEFAULT_CONFIG.get(RESET_DIMENSION_KEY);
+        SLOW_FALL_WHEN_ENTER_DIMENSIONS = (Boolean) DEFAULT_CONFIG.get(SLOW_FALL_WHEN_ENTER_DIMENSIONS_KEY);
     }
 
 }
