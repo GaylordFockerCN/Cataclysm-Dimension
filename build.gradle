@@ -97,6 +97,9 @@ dependencies {
     implementation "curse.maven:lendercataclysm-551586:6687280"
     implementation "curse.maven:lionfish-api-1001614:6168249"
     implementation "curse.maven:curios-309927:6529130"
+
+    implementation "curse.maven:cupboard-326652:6078150"
+    implementation "curse.maven:structure-essentials-forge-fabric-832882:6732857"
 }
 
 repositories {
