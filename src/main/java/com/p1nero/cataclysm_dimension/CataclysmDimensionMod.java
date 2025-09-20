@@ -15,6 +15,7 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -151,6 +152,7 @@ public class CataclysmDimensionMod {
                     LOGGER.info("[Cataclysm Dimension]: No player inside. trying to reset dimension {}.", resourceLocation);
                     IOWorker ioWorker = ((IOWorker) serverLevel.getChunkSource().chunkScanner());
                     if(Files.exists(ioWorker.storage.folder)) {
+                        serverLevel.getAllEntities().forEach(Entity::discard);
                         serverLevel.noSave = false;
                         serverLevel.save(null, true, true);
                         ioWorker.storage.regionCache.clear();
