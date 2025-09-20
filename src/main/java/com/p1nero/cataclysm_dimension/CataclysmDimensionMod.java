@@ -22,6 +22,7 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -161,6 +162,7 @@ public class CataclysmDimensionMod {
             if(serverLevel.players().isEmpty() && CataclysmDimensionModConfig.RESET_DIMENSION_IF_NO_PLAYER && !RESOURCE_KEY_BOOLEAN_MAP.getOrDefault(resourceLocation, false)) {
                 try {
                     LOGGER.info("[Cataclysm Dimension]: No player inside. trying to reset dimension {}.", resourceLocation);
+                    serverLevel.getAllEntities().forEach(Entity::discard);
                     IOWorker ioWorker = ((IOWorker) serverLevel.getChunkSource().chunkScanner());
                     if(Files.exists(ioWorker.storage.folder)) {
                         serverLevel.noSave = false;
