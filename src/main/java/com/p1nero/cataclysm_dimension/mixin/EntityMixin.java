@@ -16,7 +16,7 @@ public abstract class EntityMixin {
     @Shadow
     private Level level;
 
-    @Inject(method = "getEncodeId", at = @At("HEAD"), cancellable = true)
+    @Inject(method = {"getEncodeId", "m_20078_"}, at = @At("HEAD"), cancellable = true, remap = false)
     private void cataclysm_dimension$getEncodeId(CallbackInfoReturnable<String> cir) {
         if(CataclysmDimensionModConfig.RESET_DIMENSION_IF_NO_PLAYER) {
             if(CataclysmDimensions.LEVELS.contains(this.level.dimension())) {
