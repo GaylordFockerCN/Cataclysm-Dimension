@@ -49,6 +49,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -162,21 +163,19 @@ public class CataclysmDimensionMod {
             if(serverLevel.players().isEmpty() && CataclysmDimensionModConfig.RESET_DIMENSION_IF_NO_PLAYER && !RESOURCE_KEY_BOOLEAN_MAP.getOrDefault(resourceLocation, false)) {
                 try {
                     LOGGER.info("[Cataclysm Dimension]: No player inside. trying to reset dimension {}.", resourceLocation);
-                    serverLevel.getAllEntities().forEach(Entity::discard);
+                    serverLevel.getAllEntities().forEach((entity -> {
+                        if(entity != null) {
+                            entity.discard();
+                        }
+                    }));
                     IOWorker ioWorker = ((IOWorker) serverLevel.getChunkSource().chunkScanner());
                     if(Files.exists(ioWorker.storage.folder)) {
                         serverLevel.noSave = false;
                         serverLevel.save(null, true, true);
                         ioWorker.storage.regionCache.clear();
-                        Files.walkFileTree(ioWorker.storage.folder, new SimpleFileVisitor<>(){
-                            @Override
-                            public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) throws IOException {
-                                if(Files.deleteIfExists(file)){
-                                    LOGGER.info("[Cataclysm Dimension]: {} region cache Deleted.", resourceLocation);
-                                }
-                                return FileVisitResult.CONTINUE;
-                            }
-                        });
+                        deleteFile(ioWorker.storage.folder, resourceLocation);
+                        deleteFile(ioWorker.storage.folder.getParent().resolve("entities"), resourceLocation);
+                        deleteFile(ioWorker.storage.folder.getParent().resolve("poi"), resourceLocation);
                     } else {
                         LOGGER.info("[Cataclysm Dimension]: No region files in {}. Skipped.", resourceLocation);
                     }
@@ -187,6 +186,19 @@ public class CataclysmDimensionMod {
             }
         }
     }
+
+    private void deleteFile(Path folder, ResourceLocation dimId) throws IOException {
+        Files.walkFileTree(folder, new SimpleFileVisitor<>(){
+            @Override
+            public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) throws IOException {
+                if(Files.deleteIfExists(file)){
+                    LOGGER.info("[Cataclysm Dimension]: {} cache Deleted -> {}", dimId, file);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
     private void onToolTip(ItemTooltipEvent event) {
         if (!CataclysmDimensionModConfig.ENABLE_TELEPORT_EYE) {
             return;
