@@ -82,7 +82,7 @@ public class CataclysmDimensionMod {
         TELEPORT_CONFIGS.put(ModItems.CURSED_EYE.get(),
                 new TeleportConfig(CataclysmDimensions.CATACLYSM_ETERNAL_FROSTHOLD_LEVEL_KEY, 200, LONG_SLOW_FALLING_DURATION));
         TELEPORT_CONFIGS.put(ModItems.STORM_EYE.get(),
-                new TeleportConfig(CataclysmDimensions.CATACLYSM_SANCTUM_FALLEN_LEVEL_KEY, 200, 0)); // 0表示无效果
+                new TeleportConfig(CataclysmDimensions.CATACLYSM_SANCTUM_FALLEN_LEVEL_KEY, 200, DEFAULT_SLOW_FALLING_DURATION)); // 0表示无效果
     }
 
     private void onItemUse(LivingEntityUseItemEvent event) {
@@ -150,12 +150,21 @@ public class CataclysmDimensionMod {
             if(serverLevel.players().isEmpty() && CataclysmDimensionModConfig.RESET_DIMENSION_IF_NO_PLAYER && !RESOURCE_KEY_BOOLEAN_MAP.getOrDefault(resourceLocation, false)) {
                 try {
                     LOGGER.info("[Cataclysm Dimension]: No player inside. trying to reset dimension {}.", resourceLocation);
+                    serverLevel.getAllEntities().forEach((entity -> {
+                        if(entity != null) {
+                            entity.discard();
+                        }
+                    }));
                     IOWorker ioWorker = ((IOWorker) serverLevel.getChunkSource().chunkScanner());
                     if(Files.exists(ioWorker.storage.folder)) {
                         serverLevel.getAllEntities().forEach(Entity::discard);
                         serverLevel.noSave = false;
                         serverLevel.save(null, true, true);
                         ioWorker.storage.regionCache.clear();
+                        deleteFile(ioWorker.storage.folder, resourceLocation);
+                        deleteFile(ioWorker.storage.folder.getParent().resolve("entities"), resourceLocation);
+                        deleteFile(ioWorker.storage.folder.getParent().resolve("poi"), resourceLocation);
+
                         Files.walkFileTree(ioWorker.storage.folder, new SimpleFileVisitor<>(){
                             @Override
                             public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) throws IOException {
@@ -174,6 +183,18 @@ public class CataclysmDimensionMod {
                 }
             }
         }
+    }
+
+    private void deleteFile(Path folder, ResourceLocation dimId) throws IOException {
+        Files.walkFileTree(folder, new SimpleFileVisitor<>(){
+            @Override
+            public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) throws IOException {
+                if(Files.deleteIfExists(file)){
+                    LOGGER.info("[Cataclysm Dimension]: {} cache Deleted -> {}", dimId, file);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     private void onToolTip(ItemTooltipEvent event) {
