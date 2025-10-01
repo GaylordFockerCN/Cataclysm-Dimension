@@ -180,6 +180,7 @@ public class CataclysmDimensionMod {
                     RESOURCE_KEY_BOOLEAN_MAP.put(resourceLocation, true);
                 } catch (Exception e) {
                     LOGGER.error("[Cataclysm Dimension]: Failed to reset dimension {}.", resourceLocation, e);
+                    RESOURCE_KEY_BOOLEAN_MAP.put(resourceLocation, true);
                 }
             }
         }
