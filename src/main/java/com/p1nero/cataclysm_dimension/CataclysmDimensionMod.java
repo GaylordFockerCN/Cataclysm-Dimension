@@ -48,10 +48,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Mod(CataclysmDimensionMod.MOD_ID)
 public class CataclysmDimensionMod {
@@ -172,18 +169,17 @@ public class CataclysmDimensionMod {
                         if(!RESOURCE_KEY_BOOLEAN_MAP.getOrDefault(resourceLocation, false)) {
                             try {
                                 LOGGER.info("[Cataclysm Dimension]: No player inside. trying to reset dimension {}.", resourceLocation);
-
-                                for (Entity entity : serverLevel.getAllEntities()) {
-                                    if(entity != null){
-                                        entity.discard();
-                                    }
-                                }
                                 IOWorker ioWorker = ((IOWorker) serverLevel.getChunkSource().chunkScanner());
                                 serverLevel.noSave = false;
                                 serverLevel.save(null, true, true);
                                 ioWorker.storage.regionCache.clear();
                                 RESOURCE_LOCATION_INTEGER_MAP.put(resourceLocation, DELAY);
                                 RESOURCE_KEY_BOOLEAN_MAP.put(resourceLocation, true);
+                                List<Entity> newList = new ArrayList<>();
+                                serverLevel.getAllEntities().forEach(newList::add);
+                                for(Entity entity : newList) {
+                                    entity.discard();
+                                }
                             } catch (Exception e) {
                                 LOGGER.error("[Cataclysm Dimension]: Failed to reset dimension {}.", resourceLocation, e);
                                 RESOURCE_KEY_BOOLEAN_MAP.put(resourceLocation, true);
