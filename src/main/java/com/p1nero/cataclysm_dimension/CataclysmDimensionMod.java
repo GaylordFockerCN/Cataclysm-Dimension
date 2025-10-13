@@ -35,6 +35,7 @@ import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
@@ -61,7 +62,7 @@ public class CataclysmDimensionMod {
         MinecraftForge.EVENT_BUS.addListener(this::onToolTip);
         MinecraftForge.EVENT_BUS.addListener(this::onServerLevelTick);
         CataclysmDimensionModConfig.loadConfig();
-        bus.addListener(this::onDatapackLoad);
+        bus.addListener(EventPriority.LOWEST, this::onDatapackLoad);
         CDPlacementTypes.STRUCTURE_PLACEMENT_TYPES.register(bus);
     }
 
@@ -238,10 +239,15 @@ public class CataclysmDimensionMod {
 
     private void onDatapackLoad(AddPackFindersEvent event) {
         if (event.getPackType() == PackType.SERVER_DATA) {
+            addNewDatapack(event, "base_dimension");
             addNewDatapack(event, CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "keep_original" : "not_keep_original");
             if (CataclysmDimensionModConfig.RANDOM_SPREAD_IN_DIMENSION) {
                 addNewDatapack(event, CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "random_spread_dim" : "random_spread");
             }
+            if(CataclysmDimensionModConfig.DISABLE_RESPAWN) {
+                addNewDatapack(event, "disable_respawn");
+            }
+
         }
     }
 
