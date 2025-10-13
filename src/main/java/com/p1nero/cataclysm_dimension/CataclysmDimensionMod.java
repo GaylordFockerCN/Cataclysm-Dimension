@@ -24,6 +24,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.storage.IOWorker;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -41,7 +42,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Mod(CataclysmDimensionMod.MOD_ID)
@@ -54,7 +57,7 @@ public class CataclysmDimensionMod {
         NeoForge.EVENT_BUS.addListener(this::onToolTip);
         NeoForge.EVENT_BUS.addListener(this::onServerLevelTick);
         CataclysmDimensionModConfig.loadConfig();
-        bus.addListener(this::onDatapackLoad);
+        bus.addListener(EventPriority.LOWEST, this::onDatapackLoad);
         CDPlacementTypes.STRUCTURE_PLACEMENT_TYPES.register(bus);
     }
 
@@ -137,50 +140,68 @@ public class CataclysmDimensionMod {
      * 记录是否删过了，用ResourceLocation是因为输出比较直观
      */
     public static final Map<ResourceLocation, Boolean> RESOURCE_KEY_BOOLEAN_MAP = new HashMap<>();
+    public static final Map<ResourceLocation, Integer> RESOURCE_LOCATION_INTEGER_MAP = new HashMap<>();
+    public static final int DELAY = 200;
 
     /**
      * 没人就重置维度
      */
     private void onServerLevelTick(LevelTickEvent.Pre event) {
-        if (event.getLevel() instanceof ServerLevel serverLevel && CataclysmDimensions.LEVELS.contains(serverLevel.dimension())) {
-            ResourceLocation resourceLocation = serverLevel.dimension().location();
-            if(!serverLevel.players().isEmpty()) {
-                RESOURCE_KEY_BOOLEAN_MAP.put(resourceLocation, false);
-            }
-            if(serverLevel.players().isEmpty() && CataclysmDimensionModConfig.RESET_DIMENSION_IF_NO_PLAYER && !RESOURCE_KEY_BOOLEAN_MAP.getOrDefault(resourceLocation, false)) {
-                try {
-                    LOGGER.info("[Cataclysm Dimension]: No player inside. trying to reset dimension {}.", resourceLocation);
-                    serverLevel.getAllEntities().forEach((entity -> {
-                        if(entity != null) {
-                            entity.discard();
-                        }
-                    }));
-                    IOWorker ioWorker = ((IOWorker) serverLevel.getChunkSource().chunkScanner());
-                    if(Files.exists(ioWorker.storage.folder)) {
-                        serverLevel.getAllEntities().forEach(Entity::discard);
-                        serverLevel.noSave = false;
-                        serverLevel.save(null, true, true);
-                        ioWorker.storage.regionCache.clear();
-                        deleteFile(ioWorker.storage.folder, resourceLocation);
-                        deleteFile(ioWorker.storage.folder.getParent().resolve("entities"), resourceLocation);
-                        deleteFile(ioWorker.storage.folder.getParent().resolve("poi"), resourceLocation);
-
-                        Files.walkFileTree(ioWorker.storage.folder, new SimpleFileVisitor<>(){
-                            @Override
-                            public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) throws IOException {
-                                if(Files.deleteIfExists(file)){
-                                    LOGGER.info("[Cataclysm Dimension]: {} region cache Deleted.", resourceLocation);
-                                }
-                                return FileVisitResult.CONTINUE;
-                            }
-                        });
-                    } else {
-                        LOGGER.info("[Cataclysm Dimension]: No region files in {}. Skipped.", resourceLocation);
+        MinecraftServer server = event.getLevel().getServer();
+        for(ResourceKey<Level> levelResourceKey : CataclysmDimensions.LEVELS) {
+            ServerLevel serverLevel = server.getLevel(levelResourceKey);
+            if(serverLevel != null) {
+                if (CataclysmDimensions.LEVELS.contains(serverLevel.dimension())) {
+                    ResourceLocation resourceLocation = serverLevel.dimension().location();
+                    if(!serverLevel.players().isEmpty()) {
+                        RESOURCE_KEY_BOOLEAN_MAP.put(resourceLocation, false);
                     }
-                    RESOURCE_KEY_BOOLEAN_MAP.put(resourceLocation, true);
-                } catch (Exception e) {
-                    LOGGER.error("[Cataclysm Dimension]: Failed to reset dimension {}.", resourceLocation, e);
-                    RESOURCE_KEY_BOOLEAN_MAP.put(resourceLocation, true);
+
+                    if(serverLevel.players().isEmpty() && CataclysmDimensionModConfig.RESET_DIMENSION_IF_NO_PLAYER) {
+                        if(!RESOURCE_KEY_BOOLEAN_MAP.getOrDefault(resourceLocation, false)) {
+                            try {
+                                LOGGER.info("[Cataclysm Dimension]: No player inside. trying to reset dimension {}.", resourceLocation);
+                                IOWorker ioWorker = ((IOWorker) serverLevel.getChunkSource().chunkScanner());
+                                serverLevel.noSave = false;
+                                serverLevel.save(null, true, true);
+                                ioWorker.storage.regionCache.clear();
+                                RESOURCE_LOCATION_INTEGER_MAP.put(resourceLocation, DELAY);
+                                RESOURCE_KEY_BOOLEAN_MAP.put(resourceLocation, true);
+                                List<Entity> newList = new ArrayList<>();
+                                serverLevel.getAllEntities().forEach(newList::add);
+                                for(Entity entity : newList) {
+                                    entity.discard();
+                                }
+                            } catch (Exception e) {
+                                LOGGER.error("[Cataclysm Dimension]: Failed to reset dimension {}.", resourceLocation, e);
+                                RESOURCE_KEY_BOOLEAN_MAP.put(resourceLocation, true);
+                            }
+                        }
+
+                        int current = RESOURCE_LOCATION_INTEGER_MAP.getOrDefault(resourceLocation, 0);
+                        if(current > 0) {
+                            RESOURCE_LOCATION_INTEGER_MAP.put(resourceLocation, current - 1);
+                            if(current % 20 == 0) {
+                                LOGGER.info("[Cataclysm Dimension]: Dimension {} will be reset after {} second.", resourceLocation,  current / 20);
+                            }
+                            if(current == 1) {
+                                IOWorker ioWorker = ((IOWorker) serverLevel.getChunkSource().chunkScanner());
+                                try {
+                                    if(Files.exists(ioWorker.storage.folder)) {
+                                        ioWorker.storage.regionCache.clear();
+                                        deleteFile(ioWorker.storage.folder, resourceLocation);
+                                        deleteFile(ioWorker.storage.folder.getParent().resolve("entities"), resourceLocation);
+                                        deleteFile(ioWorker.storage.folder.getParent().resolve("poi"), resourceLocation);
+                                    } else {
+                                        LOGGER.info("[Cataclysm Dimension]: No region files in {}. Skipped.", resourceLocation);
+                                    }
+                                } catch (IOException e) {
+                                    LOGGER.error("[Cataclysm Dimension]: Failed to reset dimension {}.", resourceLocation, e);
+                                }
+                            }
+                        }
+
+                    }
                 }
             }
         }
@@ -212,26 +233,25 @@ public class CataclysmDimensionMod {
 
     private void onDatapackLoad(AddPackFindersEvent event) {
         if (event.getPackType() == PackType.SERVER_DATA) {
-            String name = CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "packs/keep_original" : "packs/not_keep_original";
-            event.addPackFinders(
-                    ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, name),
-                    PackType.SERVER_DATA,
-                    Component.literal(name),
-                    PackSource.WORLD,
-                    true,
-                    Pack.Position.TOP);
-
+            addPacket(event, "base_dimension");
+            addPacket(event, CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "packs/keep_original" : "packs/not_keep_original");
             if(CataclysmDimensionModConfig.RANDOM_SPREAD_IN_DIMENSION) {
-                name = CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "packs/random_spread_dim" : "packs/random_spread";
-                event.addPackFinders(
-                        ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, name),
-                        PackType.SERVER_DATA,
-                        Component.literal(name),
-                        PackSource.WORLD,
-                        true,
-                        Pack.Position.TOP);
+                addPacket(event, CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "packs/random_spread_dim" : "packs/random_spread");
+            }
+            if(CataclysmDimensionModConfig.DISABLE_RESPAWN) {
+                addPacket(event, "disable_respawn");
             }
         }
+    }
+
+    private void addPacket(AddPackFindersEvent event, String name) {
+        event.addPackFinders(
+                ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, name),
+                PackType.SERVER_DATA,
+                Component.literal(name),
+                PackSource.WORLD,
+                true,
+                Pack.Position.TOP);
     }
 
 }
