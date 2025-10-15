@@ -33,6 +33,7 @@ import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -146,8 +147,8 @@ public class CataclysmDimensionMod {
     /**
      * 没人就重置维度
      */
-    private void onServerLevelTick(LevelTickEvent.Pre event) {
-        MinecraftServer server = event.getLevel().getServer();
+    private void onServerLevelTick(ServerTickEvent.Pre event) {
+        MinecraftServer server = event.getServer();
         for(ResourceKey<Level> levelResourceKey : CataclysmDimensions.LEVELS) {
             ServerLevel serverLevel = server.getLevel(levelResourceKey);
             if(serverLevel != null) {
@@ -234,9 +235,9 @@ public class CataclysmDimensionMod {
     private void onDatapackLoad(AddPackFindersEvent event) {
         if (event.getPackType() == PackType.SERVER_DATA) {
             addPacket(event, "base_dimension");
-            addPacket(event, CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "packs/keep_original" : "packs/not_keep_original");
+            addPacket(event, CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "keep_original" : "not_keep_original");
             if(CataclysmDimensionModConfig.RANDOM_SPREAD_IN_DIMENSION) {
-                addPacket(event, CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "packs/random_spread_dim" : "packs/random_spread");
+                addPacket(event, CataclysmDimensionModConfig.KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS ? "random_spread_dim" : "random_spread");
             }
             if(CataclysmDimensionModConfig.DISABLE_RESPAWN) {
                 addPacket(event, "disable_respawn");
@@ -246,7 +247,7 @@ public class CataclysmDimensionMod {
 
     private void addPacket(AddPackFindersEvent event, String name) {
         event.addPackFinders(
-                ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, name),
+                ResourceLocation.fromNamespaceAndPath(CataclysmDimensionMod.MOD_ID, "packs/" + name),
                 PackType.SERVER_DATA,
                 Component.literal(name),
                 PackSource.WORLD,
