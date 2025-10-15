@@ -32,7 +32,6 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -58,7 +57,7 @@ public class CataclysmDimensionMod {
         NeoForge.EVENT_BUS.addListener(this::onToolTip);
         NeoForge.EVENT_BUS.addListener(this::onServerLevelTick);
         CataclysmDimensionModConfig.loadConfig();
-        bus.addListener(EventPriority.LOWEST, this::onDatapackLoad);
+        bus.addListener(EventPriority.HIGHEST, this::onDatapackLoad);
         CDPlacementTypes.STRUCTURE_PLACEMENT_TYPES.register(bus);
     }
 
