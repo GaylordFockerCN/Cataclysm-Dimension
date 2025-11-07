@@ -62,7 +62,7 @@ public class CataclysmDimensionMod {
         MinecraftForge.EVENT_BUS.addListener(this::onToolTip);
         MinecraftForge.EVENT_BUS.addListener(this::onServerLevelTick);
         CataclysmDimensionModConfig.loadConfig();
-        bus.addListener(EventPriority.LOWEST, this::onDatapackLoad);
+        bus.addListener(EventPriority.HIGHEST, this::onDatapackLoad);
         CDPlacementTypes.STRUCTURE_PLACEMENT_TYPES.register(bus);
     }
 

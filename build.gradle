@@ -90,6 +90,12 @@ dependencies {
     implementation fg.deobf("curse.maven:curios-309927:6418456")
     implementation fg.deobf("curse.maven:lionfish-api-1001614:5922047")
 
+//    implementation fg.deobf("curse.maven:integrated-cataclysm-1164949:7046903")
+//    implementation fg.deobf("curse.maven:create-328085:6641603")
+//    implementation fg.deobf("curse.maven:integrated-api-817709:6369317")
+//    implementation fg.deobf("curse.maven:quark-243121:6427817")
+//    implementation fg.deobf("curse.maven:supplementaries-412082:7054158")
+
 }
 
 mixin {
