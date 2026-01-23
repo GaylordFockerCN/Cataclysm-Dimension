@@ -94,7 +94,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 
 dependencies {
-    implementation "curse.maven:lendercataclysm-551586:6687280"
+    implementation "curse.maven:lendercataclysm-551586:6906997"
     implementation "curse.maven:lionfish-api-1001614:6168249"
     implementation "curse.maven:curios-309927:6529130"
 
