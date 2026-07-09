@@ -17,9 +17,21 @@ public class CataclysmDimensionModConfig {
     public static boolean ENABLE_TELEPORT_EYE = true;
     public static boolean KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS = false;
     public static boolean RANDOM_SPREAD_IN_DIMENSION = false;
+    // 调试开关:开启后每次存档启动时清空全部灾变维度区块,按世界生成重铺一份完好地图(修坏图用)。默认关。
     public static boolean RESET_DIMENSION_IF_NO_PLAYER = false;
     public static boolean SLOW_FALL_WHEN_ENTER_DIMENSIONS = true;
     public static boolean DISABLE_RESPAWN = false;
+    // 传送进入维度时是否消耗对应的眼睛物品(创造模式不消耗)
+    public static boolean CONSUME_TELEPORT_EYE = false;
+    // 身处灾变维度内时是否仍可使用眼睛(默认否:维度内不可用)
+    public static boolean ALLOW_USE_EYE_IN_DIMENSION = false;
+    // 玩家再次进入用过的 boss 维度时,把该 boss 结构地形重盖成完好(让下一个玩家看到干净竞技场;
+    // boss 再战由基础模组的击杀-回刷怪器负责,此项只管地形)。
+    public static boolean RESET_STRUCTURE_ON_REENTRY = true;
+    // 大 boss 被击杀后生成归返裂隙(右键离开维度)。默认关。
+    public static boolean ENABLE_RETURN_RIFT = false;
+    // 开启后只有主 boss 被击杀过、重进才重盖结构(重盖成功即消耗标记,要再打赢才再重盖)。默认关=每次重进都重盖。
+    public static boolean RESET_STRUCTURE_REQUIRES_BOSS_KILL = false;
 
     // 配置键名常量
     private static final String ENABLE_TELEPORT_EYE_KEY = "enable_teleport_eye";
@@ -28,18 +40,28 @@ public class CataclysmDimensionModConfig {
     private static final String RESET_DIMENSION_KEY = "reset_dimension_if_no_player";
     private static final String SLOW_FALL_WHEN_ENTER_DIMENSIONS_KEY = "slow_fall_when_enter_dimensions";
     private static final String DISABLE_RESPAWN_KEY = "disable_respawn"; // 新增的键名常量
+    private static final String CONSUME_TELEPORT_EYE_KEY = "consume_teleport_eye";
+    private static final String ALLOW_USE_EYE_IN_DIMENSION_KEY = "allow_use_eye_in_dimension";
+    private static final String RESET_STRUCTURE_ON_REENTRY_KEY = "reset_structure_on_reentry";
+    private static final String ENABLE_RETURN_RIFT_KEY = "enable_return_rift";
+    private static final String RESET_STRUCTURE_REQUIRES_BOSS_KILL_KEY = "reset_structure_requires_boss_kill";
 
     public static final String JSON = CataclysmDimensionMod.MOD_ID + ".json";
     public static final Logger LOGGER = LoggerFactory.getLogger("cataclysm_dimension_config");
 
-    // 默认配置映射 - 添加 DISABLE_RESPAWN
-    private static final Map<String, Object> DEFAULT_CONFIG = Map.of(
-            ENABLE_TELEPORT_EYE_KEY, ENABLE_TELEPORT_EYE,
-            KEEP_STRUCTURES_KEY, KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS,
-            RANDOM_SPREAD_KEY, RANDOM_SPREAD_IN_DIMENSION,
-            RESET_DIMENSION_KEY, RESET_DIMENSION_IF_NO_PLAYER,
-            SLOW_FALL_WHEN_ENTER_DIMENSIONS_KEY, SLOW_FALL_WHEN_ENTER_DIMENSIONS,
-            DISABLE_RESPAWN_KEY, DISABLE_RESPAWN // 新增默认配置项
+    // 默认配置映射
+    private static final Map<String, Object> DEFAULT_CONFIG = Map.ofEntries(
+            Map.entry(ENABLE_TELEPORT_EYE_KEY, ENABLE_TELEPORT_EYE),
+            Map.entry(KEEP_STRUCTURES_KEY, KEEP_STRUCTURES_IN_ORIGINAL_DIMENSIONS),
+            Map.entry(RANDOM_SPREAD_KEY, RANDOM_SPREAD_IN_DIMENSION),
+            Map.entry(RESET_DIMENSION_KEY, RESET_DIMENSION_IF_NO_PLAYER),
+            Map.entry(SLOW_FALL_WHEN_ENTER_DIMENSIONS_KEY, SLOW_FALL_WHEN_ENTER_DIMENSIONS),
+            Map.entry(DISABLE_RESPAWN_KEY, DISABLE_RESPAWN),
+            Map.entry(CONSUME_TELEPORT_EYE_KEY, CONSUME_TELEPORT_EYE),
+            Map.entry(ALLOW_USE_EYE_IN_DIMENSION_KEY, ALLOW_USE_EYE_IN_DIMENSION),
+            Map.entry(RESET_STRUCTURE_ON_REENTRY_KEY, RESET_STRUCTURE_ON_REENTRY),
+            Map.entry(ENABLE_RETURN_RIFT_KEY, ENABLE_RETURN_RIFT),
+            Map.entry(RESET_STRUCTURE_REQUIRES_BOSS_KILL_KEY, RESET_STRUCTURE_REQUIRES_BOSS_KILL)
     );
 
     public static void loadConfig() {
@@ -70,6 +92,8 @@ public class CataclysmDimensionModConfig {
                     LOGGER.info("Adding missing config key: {}", key);
                     if (entry.getValue() instanceof Boolean) {
                         config.addProperty(key, (Boolean) entry.getValue());
+                    } else if (entry.getValue() instanceof Number) {
+                        config.addProperty(key, (Number) entry.getValue());
                     }
                     needsUpdate = true;
                 }
@@ -89,6 +113,11 @@ public class CataclysmDimensionModConfig {
             RESET_DIMENSION_IF_NO_PLAYER = config.get(RESET_DIMENSION_KEY).getAsBoolean();
             SLOW_FALL_WHEN_ENTER_DIMENSIONS = config.get(SLOW_FALL_WHEN_ENTER_DIMENSIONS_KEY).getAsBoolean();
             DISABLE_RESPAWN = config.get(DISABLE_RESPAWN_KEY).getAsBoolean(); // 新增配置项读取
+            CONSUME_TELEPORT_EYE = config.get(CONSUME_TELEPORT_EYE_KEY).getAsBoolean();
+            ALLOW_USE_EYE_IN_DIMENSION = config.get(ALLOW_USE_EYE_IN_DIMENSION_KEY).getAsBoolean();
+            RESET_STRUCTURE_ON_REENTRY = config.get(RESET_STRUCTURE_ON_REENTRY_KEY).getAsBoolean();
+            ENABLE_RETURN_RIFT = config.get(ENABLE_RETURN_RIFT_KEY).getAsBoolean();
+            RESET_STRUCTURE_REQUIRES_BOSS_KILL = config.get(RESET_STRUCTURE_REQUIRES_BOSS_KILL_KEY).getAsBoolean();
 
         } catch (IOException e) {
             LOGGER.error("Failed to load configuration file: {}", e.getMessage());
@@ -111,6 +140,8 @@ public class CataclysmDimensionModConfig {
                 for (Map.Entry<String, Object> entry : DEFAULT_CONFIG.entrySet()) {
                     if (entry.getValue() instanceof Boolean) {
                         config.addProperty(entry.getKey(), (Boolean) entry.getValue());
+                    } else if (entry.getValue() instanceof Number) {
+                        config.addProperty(entry.getKey(), (Number) entry.getValue());
                     }
                 }
 
@@ -132,5 +163,10 @@ public class CataclysmDimensionModConfig {
         RESET_DIMENSION_IF_NO_PLAYER = (Boolean) DEFAULT_CONFIG.get(RESET_DIMENSION_KEY);
         SLOW_FALL_WHEN_ENTER_DIMENSIONS = (Boolean) DEFAULT_CONFIG.get(SLOW_FALL_WHEN_ENTER_DIMENSIONS_KEY);
         DISABLE_RESPAWN = (Boolean) DEFAULT_CONFIG.get(DISABLE_RESPAWN_KEY);
+        CONSUME_TELEPORT_EYE = (Boolean) DEFAULT_CONFIG.get(CONSUME_TELEPORT_EYE_KEY);
+        ALLOW_USE_EYE_IN_DIMENSION = (Boolean) DEFAULT_CONFIG.get(ALLOW_USE_EYE_IN_DIMENSION_KEY);
+        RESET_STRUCTURE_ON_REENTRY = (Boolean) DEFAULT_CONFIG.get(RESET_STRUCTURE_ON_REENTRY_KEY);
+        ENABLE_RETURN_RIFT = (Boolean) DEFAULT_CONFIG.get(ENABLE_RETURN_RIFT_KEY);
+        RESET_STRUCTURE_REQUIRES_BOSS_KILL = (Boolean) DEFAULT_CONFIG.get(RESET_STRUCTURE_REQUIRES_BOSS_KILL_KEY);
     }
 }

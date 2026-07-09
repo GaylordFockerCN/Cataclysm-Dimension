@@ -7,5 +7,8 @@
   "biome.cataclysm_dimension.the_end": "遗亡坚垒",
   "biome.cataclysm_dimension.warm_ocean": "圣陨禁域",
   "biome.cataclysm_dimension.snowy_plains": "永锢冰狱",
-  "tip.cataclysm_dimension.enter": "潜行时按右键以传送进对应维度"
+  "entity.cataclysm_dimension.return_rift": "归返裂隙",
+  "tip.cataclysm_dimension.enter": "潜行时按右键以传送进对应维度",
+  "tip.cataclysm_dimension.eye_disabled_in_dimension": "身处灾变维度内时无法使用眼睛",
+  "tip.cataclysm_dimension.rift_opened": "boss 倒下之处开启了归返裂隙,右键即可离开维度"
 }

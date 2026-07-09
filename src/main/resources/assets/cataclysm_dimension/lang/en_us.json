@@ -7,5 +7,8 @@
   "biome.cataclysm_dimension.the_end": "Bastion of the Lost",
   "biome.cataclysm_dimension.warm_ocean": "Sanctum Fallen",
   "biome.cataclysm_dimension.snowy_plains": "Eternal Frosthold",
-  "tip.cataclysm_dimension.enter": "Right Click when pressing shift to Enter Dimension."
+  "entity.cataclysm_dimension.return_rift": "Return Rift",
+  "tip.cataclysm_dimension.enter": "Right Click when pressing shift to Enter Dimension.",
+  "tip.cataclysm_dimension.eye_disabled_in_dimension": "The eye cannot be used while inside a cataclysm dimension.",
+  "tip.cataclysm_dimension.rift_opened": "A return rift has opened where the boss fell. Right-click it to leave."
 }
